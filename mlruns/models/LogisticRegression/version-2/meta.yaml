@@ -1,0 +1,14 @@
+aliases: []
+creation_timestamp: 1741614432349
+current_stage: None
+description: ''
+last_updated_timestamp: 1741614432349
+name: LogisticRegression
+run_id: 25937a4c0aa846698e2472d6d03f2979
+run_link: ''
+source: file:///c:/Users/frede/OneDrive/Bureau/Formation%20Data%20Scientist/Projet%207/mlruns/0/25937a4c0aa846698e2472d6d03f2979/artifacts/mlflow_model
+status: READY
+status_message: null
+storage_location: file:///c:/Users/frede/OneDrive/Bureau/Formation%20Data%20Scientist/Projet%207/mlruns/0/25937a4c0aa846698e2472d6d03f2979/artifacts/mlflow_model
+user_id: null
+version: 2
