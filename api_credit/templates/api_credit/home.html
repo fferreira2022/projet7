@@ -1,0 +1,42 @@
+{% extends 'main.html' %}
+{% block title %}Prêt à dépenser | Crédit Scoring{% endblock %}
+{% load static %}
+{% block content %}
+{{ redirect_to_login_immediately }} {# <= étape 3 pour installer django_auto_logout #}
+<div class='container homepage_main_div'>
+    <div class='row'>
+        <div class='col-md-6 col-sm-12 mb-3'>
+            <h1 class="text-center text-light" id="main_title"><b>Hi!</b></h1>
+            <div class="container w-100" id="picture_main_div">
+                <p>
+                    Calcule la probabilité qu'un client fasse défaut ! 
+                </p>
+
+                <div class="container text-center mt-4">
+                    <h3>Choisissez un modèle pour obtenir une prédiction :</h3>
+                    <form method="POST" action="{% url 'predict' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <select name="model" class="form-control w-50 mx-auto" required>
+                                <option value="" disabled selected>-- Sélectionnez un modèle --</option>
+                                <option value="model1">Modèle 1</option>
+                                <option value="model2">Modèle 2</option>
+                                <option value="model3">Modèle 3</option> <!-- Ajoutez autant de modèles que nécessaire -->
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success mt-3">Obtenir une prédiction</button>
+                    </form>
+                </div>
+                
+                
+            </div>
+        </div>
+        <div class='col-md-6 col-sm-12 mb-3 text-bg-dark'>
+            <img src="{% static '/images/banner_homepage.png' %}" class="img-fluid rounded mx-auto d-block w-100">
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+
+

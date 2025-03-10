@@ -1,0 +1,39 @@
+{% extends 'main.html' %}
+{% block title %}Login | Prêt à dépenser{% endblock %}
+{% block content %}
+    <div class="container homepage_main_div">
+        <h1 class="text-center text-light" id="main_title"><b>Log in</b></h1>
+        <div class="container card p-3 text-center login_div">
+        {% if page == 'login' %}
+            <form class="" method="POST" action="">
+                {% csrf_token %}
+                
+                <div class="form-outline mb-4">
+                    <input type="email" name="email" class="form-control" placeholder="Email"/> 
+                </div>
+
+                <!-- Password input -->
+                <div class="form-outline mb-4">
+                    <input type="password" name="password" id="form1Example2" class="form-control" placeholder="Password"/> 
+                </div> 
+
+                <!-- Submit button -->
+                    <button type="submit" class="btn btn-outline-success btn-sm w-100" value="Login">Log in</button>
+                    <br></br>
+
+                <div class="col text-center">
+                    <p>Forgot password?<a class= "btn w-100 a link_style" href="{% url 'reset_password' %}">Reset password</a></p>
+                </div>
+                
+            </form>
+        {% endif %}
+        </div>
+    </div>
+{% endblock content %}
+{% for message in messages %} {# boucle for, étape 5 pour installer django auto logout #}
+    <div class="message text-center alert alert-info {{ message.tags }}" role="alert">
+        <p style="color: red;">{{message}}</p>
+    </div>
+{% endfor %}
+
+

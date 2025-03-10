@@ -1,0 +1,284 @@
+.flex-wrapper {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+#main_body_style {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.messages {
+  display: flex;
+  background-color: #fdfdfd;
+  color: red;
+  justify-content: center;
+  align-items: center;
+  margin: 20px auto;
+  max-width: 60%;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/********************************/
+.home_page {
+  height: 70%;
+}
+
+.homepage_main_div {
+  margin-top: 10%;
+}
+
+#Portfolio_page_div {
+  margin: auto !important;
+}
+
+#main_title {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#parent {
+  position: relative;
+}
+
+#picture_main_div {
+  margin: auto !important;
+  max-width: 50rem !important;
+}
+
+/* .iframes_portfolio_page {
+  max-width: 100%;
+  max-height: 100%;
+} */
+
+@media (max-width: 768px) {
+  .text-overlay {
+    font-size: 14px;
+    /* Additional styles for smaller screens */
+  }
+}
+
+.a {
+  text-decoration: none;
+  font-size: 16px;
+  color: #dddddd;
+}
+
+.user_name {
+  font-size: 15px;
+  color: aliceblue;
+}
+
+.footer_style {
+  bottom: 0;
+  width: 100%;
+  padding: 10px 0;
+  text-decoration: none;
+  margin-top: auto;
+  font-size: large;
+}
+
+.hr_style {
+  color: #ffc107;
+}
+
+.link_style {
+  color: white;
+  text-decoration: none;
+}
+
+.buttons_style {
+  color: white !important;
+  text-decoration: none;
+}
+
+.navbar-nav > li {
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+.navbar-nav .nav-item .nav-link >h5:hover {
+  color: white !important;
+}
+
+.dropdown_style {
+  background-color: white;
+  text-align: center !important;
+  padding: 5px;
+  color: black !important;
+}
+
+#user_profile_main_div {
+  justify-content: center;
+  margin-top: 7%;
+  margin-bottom: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#profile_page {
+  margin-top: 6%;
+}
+
+#profile-container_1,
+#profile-container_2,
+#profile-container_3,
+#update_profile-container {
+  margin: 5% auto;
+  background-color: #2b3035 !important;
+  color: white;
+  max-width: 50rem !important;
+}
+
+.text_area {
+  height: 50px;
+  width: 100%;
+  margin-top: -5px;
+}
+
+#response {
+  white-space: pre-wrap;
+}
+
+#contact_main_div {
+  border: none;
+  margin: 5% auto;
+  max-width: 50rem !important;
+  max-height: 50rem !important;
+}
+
+#contact_style {
+  margin-bottom: 6%;
+  margin: auto !important;
+  background-color: #2b3035 !important;
+  color: white;
+  max-width: 30rem;
+  max-height: 30rem;
+}
+
+#contact_page_legend {
+  margin-top: 5%;
+  margin: auto !important;
+  max-width: 50rem !important;
+}
+
+.login_div {
+  margin: auto !important;
+  max-width: 25rem !important;
+  background-color: #2b3035 !important;
+}
+
+#register_form {
+  margin-top: 3%;
+  margin-bottom: auto;
+  background-color: #2b3035 !important;
+  margin: auto !important;
+  max-width: 35rem !important;
+}
+
+.register_box {
+  background-color: #2b3035 !important;
+}
+
+.register_box h2,
+.register_box p {
+  color: whitesmoke !important;
+}
+
+.register_box form {
+  background-color: #2b3035 !important;
+  color: whitesmoke !important;
+}
+
+.register_box button {
+  background-color: #2b3035;
+}
+
+#password_reset_form {
+  margin: auto;
+  color: white;
+  max-width: 35rem !important;
+}
+
+#password_reset_form_2 {
+  background-color: #2b3035 !important;
+}
+
+#password_reset {
+  margin: auto !important;
+  max-width: 25rem !important;
+}
+
+.password_reset_2 {
+  background-color: #2b3035 !important;
+}
+
+#password_reset_sent {
+  margin: auto;
+  justify-content: flex-start;
+  align-content: center;
+  max-width: 50rem !important;
+}
+
+#password_reset_done {
+  margin: auto;
+  justify-content: center;
+  align-content: center;
+  text-align: center;
+}
+
+#resume_iframe {
+  width: 100%;
+  height: 30vh;
+}
+
+#alert_messages {
+  margin-top: 5%;
+}
+
+#delete_account_profile,
+#delete_account_page {
+  border: none;
+  margin: 5% auto;
+  max-width: 50rem !important;
+}
+
+.embed-responsive {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  padding-bottom: 56.25%; /* 16:9 ratio */
+}
+
+.embed-responsive .embed-responsive-item {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.text-justify {
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+#US_road_image {
+  margin-top: 6%;
+}
+
+.no-underline a {
+  text-decoration: none;
+}
+
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Adjust this value as needed */
+  text-decoration: none;
+}

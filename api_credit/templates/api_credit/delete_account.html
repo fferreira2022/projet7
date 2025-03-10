@@ -1,0 +1,13 @@
+{% extends 'main.html' %}
+{% block title %}Delete Account | Frederic Ferreira{% endblock %}
+{% block content %}
+<div class="container card w-75 text-center" id="delete_account_page">
+    <h2>Are you sure you want to delete your account?</h2>
+    <p>All of your data will be deleted from ou database.</p>
+    <form method="POST" action="{% url 'delete_account' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger btn-sm">Yes, I want to delete my account</button>
+        <a href="{% url 'user-profile' request.user.pk %}" class="btn btn-outline-light btn-sm">No, I want to keep my account</a>
+    </form>
+</div>
+{% endblock content %}

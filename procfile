@@ -1,0 +1,2 @@
+web: gunicorn api_credit.wsgi --log-file
+web: python manage.py migrate && gunicorn api_credit.wsg

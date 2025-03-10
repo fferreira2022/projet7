@@ -1,0 +1,12 @@
+{% extends 'main.html' %}
+{% block title %}Résultat | Credit Scoring{% endblock %}
+{% load static %}
+{% block content %}
+<div class="container text-center mt-5">
+    <h1>Résultat de la prédiction</h1>
+    <p><strong>Modèle utilisé :</strong> {{ model_name }}</p>
+    <p><strong>Probabilité de défaut :</strong> {{ prob_default|floatformat:2 }}</p>
+    <p><strong>Classe prédite :</strong> {{ category }}</p>
+    <a href="{% url 'homepage' %}" class="btn btn-primary mt-3">Revenir à l'accueil</a>
+</div>
+{% endblock content %}

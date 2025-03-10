@@ -1,0 +1,20 @@
+{% extends 'main.html' %}
+{% block title %}Profile Update | Frederic Ferreira{% endblock %}
+{% block content %}
+<br></br>
+<div class="card w-50" id="update_profile-container">
+    <div class="card-body">
+        <form method="POST" class="">
+            {% csrf_token %}
+            <br>
+            <h6>Enter your new username:</h6>
+            {{form.username}}
+            <br>
+            <h6>Enter your new email address:</h6>
+            {{form.email}}
+            <br/>
+            <center><button type="submit" class="btn btn-outline-success btn-sm w-100">Submit</button></center>
+        </form>
+    </div>
+</div>
+{% endblock content %}

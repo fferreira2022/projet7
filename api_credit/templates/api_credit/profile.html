@@ -1,0 +1,99 @@
+{% extends 'main.html' %}
+{% block title %}Profile | Frederic Ferreira{% endblock %}
+{% block content %}
+{% if request.user.id == user.id %}
+    <div class="container" id="user_profile_main_div">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8 col-sm-10 mb-3">
+                <h3 class="text-center">User space</h3>
+                <div class="card rounded-3 p-4" id="profile-container_1">
+                    <div class="card-body">
+                        <center><h5 style="color: white;">Login</h5></center>
+                        <hr>
+                        <div>
+                            <label><b>Username:</b></label>
+                            <p>{{user.username}}</p>
+                            <label><b>E-mail:</b></label>
+                            <p>{{user.email}}</p>
+                            <a class="btn btn-outline-success btn-sm" href="{% url 'update-profile' %}">Modify</a>
+                        </div>
+                        <hr>
+                        <div>
+                            <label><b>Password:</b></label>
+                            {% comment %} <p>{{user.password}}</p> {% endcomment %}
+                            <p>********</p>
+                            <a class="btn btn-outline-success btn-sm" href="{% url 'reset_password' %}">Modify</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card rounded-3 p-4 text-center mt-3" id='delete_account_profile'>
+                    <a href="{% url 'delete_account' %}" class="btn btn-outline-danger btn-sm">Delete account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8 col-sm-10">
+                <div class="card border p-4" id="profile-container_2">
+                    <p>You're not authorized to access this page</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+{% endif %}
+{% endblock content %}
+
+
+
+
+{% comment %} {% extends 'main.html' %}
+{% block content %}
+<br><br>
+{% if request.user.id == user.id %}
+    <div class="text-center">
+        <h3>User space</h3>
+    </div>
+    <div class="container row" id="user_profile_main_div">
+        <div class="col-md-12 col-sm-6 mb-3">
+            <div class="card w-50 rounded-3 p-4" id="profile-container_1">
+                <div class="card-body">
+                    <center><h5 style="color: white;">Login</h5></center>
+                    <hr>
+                    <div>
+                        <label><b>Username:</b></label>
+                        <p>{{user.username}}</p>
+                        <label><b>E-mail:</b></label>
+                        <p>{{user.email}}</p>
+                        <a class="btn btn-outline-success btn-sm" href="{% url 'update-profile' %}">Modify</a>
+                    </div>
+                    <hr>
+                    <div>
+                        <label><b>Password:</b></label>
+                        {% comment %} <p>{{user.password}}</p> {% endcomment %}
+                        {% comment %} <p>********</p>
+                        <a class="btn btn-outline-success btn-sm" href="{% url 'reset_password' %}">Modify</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card w-50 rounded-3 p-4 text-center" id='delete_account_profile'>
+                <a href="{% url 'delete_account' %}" class="btn btn-outline-danger btn-sm">Delete account</a>
+            </div>
+        </div>
+        <div class="col-md-12 col-sm-6 mb-3">
+        </div>
+    </div>
+{% else %}
+    <div class="card w-75 border p-4" id="profile-container_2">
+    <p>You're not authorized to access this page</p>
+    </div>
+    <br>
+{% endif %}
+{% endblock content %} {% endcomment %} 
+
+
+
+
+

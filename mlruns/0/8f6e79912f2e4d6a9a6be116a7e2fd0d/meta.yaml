@@ -1,0 +1,16 @@
+artifact_uri: file:///c:/Users/frede/OneDrive/Bureau/Formation%20Data%20Scientist/Projet%207/mlruns/0/8f6e79912f2e4d6a9a6be116a7e2fd0d/artifacts
+deleted_time: 1741597208887
+end_time: 1741542975212
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: deleted
+run_id: 8f6e79912f2e4d6a9a6be116a7e2fd0d
+run_name: LogisticRegression
+run_uuid: 8f6e79912f2e4d6a9a6be116a7e2fd0d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1741542569041
+status: 4
+tags: []
+user_id: frede

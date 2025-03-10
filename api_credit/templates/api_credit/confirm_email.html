@@ -1,0 +1,8 @@
+{% autoescape off %}
+Bonjour {{user.username}},
+
+Pour valider votre inscription sur fredericferreira.com, veuillez cliquer sur le lien de confirmation ci-dessous:
+
+http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+
+{% endautoescape %}

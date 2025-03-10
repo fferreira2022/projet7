@@ -1,0 +1,16 @@
+artifact_uri: file:///c:/Users/frede/OneDrive/Bureau/Formation%20Data%20Scientist/Projet%207/mlruns/0/fe4372cf5bcd47508539b4a245aa11e8/artifacts
+deleted_time: 1741450548862
+end_time: 1741448942290
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: deleted
+run_id: fe4372cf5bcd47508539b4a245aa11e8
+run_name: LinearSVC
+run_uuid: fe4372cf5bcd47508539b4a245aa11e8
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1741448942163
+status: 4
+tags: []
+user_id: frede

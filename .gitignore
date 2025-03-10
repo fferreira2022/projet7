@@ -1,0 +1,5 @@
+data_for_credit_scoring_model/
+.venv/
+%USERPROFILE%/
+install-pyenv-win.ps1/
+secret_key.txt/
