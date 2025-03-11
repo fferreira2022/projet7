@@ -1,9 +1,0 @@
-artifact_location: file:C:/Users/frede/OneDrive/Bureau/Projet7/artifacts_of_exp_250310
-creation_time: 1741597539183
-experiment_id: '455396487369994462'
-last_update_time: 1741611265202
-lifecycle_stage: deleted
-name: experiment_250310
-tags:
-  env: dev
-  version: '25_03_10'

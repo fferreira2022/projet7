@@ -46,16 +46,20 @@ from django.urls import reverse
 
 import mlflow.pyfunc  # Utilisé pour charger des modèles MLflow
 import json
+import pandas as pd
+
+from joblib import load
 
 '''
 -------------------------------------- Views django ---------------------------
 '''
 
+
 def home(request):
     return render(request, 'api_credit/home.html')
 
-def portfolio(request):
-    return render(request, 'api_credit/portfolio.html')
+def result(request):
+    return render(request, 'api_credit/result.html')
 
 
 # activation du compte après inscription, fait appel au fichier tokens.py
@@ -78,7 +82,7 @@ def activate(request, uidb64, token):
 
 # confirmation de l'adresse email
 def confirm_Email(request, user, to_email):
-    mail_subject = 'Confirm your email address'
+    mail_subject = 'Confirmer votre adresse email'
     message = render_to_string('api_credit/confirm_email.html', {
         'user': user,
         'domain': get_current_site(request).domain,
@@ -88,9 +92,9 @@ def confirm_Email(request, user, to_email):
     })
     email = EmailMessage(mail_subject, message, to=[to_email])
     if email.send():
-        messages.success(request, f'Dear {user.username}, please confirm your email address by clicking on the following activation link.')
+        messages.success(request, f'Cher(e) {user.username}, veuillez confirmer votre adresse email en cliquant sur le lien suivant.')
     else:
-        messages.error(request, f"An error has occurred during sending of the activation link to {to_email} ")
+        messages.error(request, f"Une erreur s'est produite pendant l'envoi du lien d'activation à {to_email} ")
     # return render(request,'api_credit/confirm_email.html', {'email': email})
 
 # formulaire d'inscription
@@ -106,7 +110,7 @@ def signup(request):
             confirm_Email(request, user, form.cleaned_data.get('email'))
             return redirect('home')
         else:
-            messages.error(request, "An error has occurred during registration")
+            messages.error(request, "Une erreur s'est produite lors de l'inscription")
     else:
         form = SignUpForm()
         
@@ -126,7 +130,7 @@ def loginPage(request):
         try:
             user = CustomUser.objects.get(email=email)
         except CustomUser.DoesNotExist:
-            messages.error(request, 'Invalid email address')
+            messages.error(request, 'Adresse email invalide')
             return redirect('login')
         if user.check_password(password):
             # Si le mot de passe est correct, on connecte l'utilisateur
@@ -134,7 +138,7 @@ def loginPage(request):
             return redirect('home')
         else:
             # si le mot de passe est incorrect, on affiche un message d'erreur
-            messages.error(request, 'Invalid username or password')
+            messages.error(request, 'Nom d\'utilisateur ou mot de passe invalide')
             return redirect('login')
     context ={'page': page}
     return render(request, 'api_credit/login.html', context)
@@ -165,7 +169,7 @@ def updateProfile(request):
         if form.is_valid():
             form.save()
             login(request, current_user)
-            messages.success(request, 'Your profile was updated successfully.')
+            messages.success(request, 'Votre profil a été mis à jour.')
     context = {'form': form, 'user': current_user}
     return render(request, 'api_credit/update_profile.html', context)
 
@@ -175,43 +179,80 @@ def delete_account(request):
     if request.method == 'POST':
         user = request.user
         user.delete()
-        messages.success(request, "Your account has been deleted.")
+        messages.success(request, "Votre compte a été supprimé.")
         return redirect('home') 
     else:
         return render(request, 'api_credit/delete_account.html')
     
 
-@login_required(login_url='login')
-def scoring_api(request):
+def predict(request):
     if request.method == 'POST':
-        # Charger les données envoyées dans la requête
         try:
-            data = json.loads(request.body)
-            model_name = data.get("model", "CreditScoringModel")  # Nom du modèle
-            features = data.get("features", {})
-        except (KeyError, ValueError) as e:
-            return JsonResponse({"error": "Requête invalide ou données manquantes"}, status=400)
+            # Récupérer le modèle sélectionné par l'utilisateur
+            selected_model = request.POST.get('model')
+            if not selected_model:
+                return JsonResponse({"error": "Veuillez sélectionner un modèle."}, status=400)
+            
+            # Charger le modèle LogisticRegression si sélectionné
+            if selected_model == 'LogisticRegression':
+                # Définir le chemin absolu vers le modèle
+                model_path = os.path.join(settings.BASE_DIR, 'best_models', 'LogisticRegression.joblib')
+                # Charger le modèle
+                model = load(model_path)
+            else:
+                return JsonResponse({"error": f"Le modèle '{selected_model}' n'est pas disponible."}, status=400)
 
-        # Charger le modèle depuis le Model Registry en production
-        try:
-            model_uri = f"models:/{model_name}/production"  # Modèle dans le registre MLflow
-            model = mlflow.pyfunc.load_model(model_uri)
+            # Initialiser les données
+            data = None
+            
+            # Vérifier les données saisies manuellement
+            data_input = request.POST.get('data_input')
+            if data_input:
+                try:
+                    # Convertir les données JSON saisies en DataFrame
+                    data_dict = json.loads(data_input)
+                    data = pd.DataFrame(data_dict, index=[0]) if isinstance(data_dict, dict) else pd.DataFrame(data_dict)
+                except json.JSONDecodeError:
+                    return JsonResponse({"error": "Les données saisies ne sont pas au format JSON valide."}, status=400)
+
+            # Vérifier le fichier téléchargé
+            file_input = request.FILES.get('file_input')
+            if file_input:
+                if file_input.name.endswith('.csv'):
+                    data = pd.read_csv(file_input)
+                elif file_input.name.endswith('.json'):
+                    data = pd.read_json(file_input)
+                else:
+                    return JsonResponse({"error": "Format de fichier non supporté. Veuillez fournir un fichier CSV ou JSON."}, status=400)
+
+            # Vérifier si des données ont été fournies
+            if data is None:
+                return JsonResponse({"error": "Aucune donnée fournie. Veuillez entrer des données ou télécharger un fichier."}, status=400)
+
+            # Effectuer la prédiction avec le modèle
+            # Séparer SK_ID_CURR des features
+            
+            identifier = int(data['SK_ID_CURR'].values[0])
+            X_features = data.drop(columns=['SK_ID_CURR'])
+            
+            predictions = model.predict(X_features)
+            probability = float(model.predict_proba(X_features)[:, 1])
+            
+            # Préparer et retourner les résultats
+            context = {
+                "SK_ID_CURR": identifier,
+                "model": selected_model,
+                "probability": probability,
+                "predictions": predictions.tolist(),
+            }
+            return render(request, 'api_credit/predict.html', context)
+
         except Exception as e:
-            return JsonResponse({"error": f"Erreur lors du chargement du modèle : {str(e)}"}, status=500)
+            return render(request, 'api_credit/predict.html', {"error_message": f"Une erreur est survenue : {str(e)}"})
 
-        # Effectuer une prédiction avec les features fournies
-        try:
-            prediction = model.predict([features])
-            prob_default = prediction[0]  # Exemple : probabilité de défaut
-            category = 1 if prob_default > 0.5 else 0  # Catégorie basée sur un seuil
-        except Exception as e:
-            return JsonResponse({"error": f"Erreur pendant la prédiction : {str(e)}"}, status=500)
+    return render(request, 'api_credit/predict.html', {"error_message": "Seules les requêtes POST sont acceptées."})
 
-        # Retourner les résultats
-        return JsonResponse({
-            "probability_of_default": prob_default,
-            "category": category
-        })
 
-    return JsonResponse({"error": "Méthode non autorisée"}, status=405)
+
+
 

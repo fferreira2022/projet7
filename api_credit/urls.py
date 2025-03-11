@@ -9,7 +9,8 @@ urlpatterns = [
     path('register/', views.signup, name='register'),
     path('activate/<uidb64>/<token>/', views.activate, name='activate'),
     path('', views.home, name='home'),
-    path('predict/', views.scoring_api, name='predict'),
+    path('predict/', views.predict, name='predict'),
+    # path('result/', views.result, name='result'),
     path('profile/<str:pk>/', views.userProfile, name='user-profile'),
     path('update_profile/', views.updateProfile, name='update-profile'),
     

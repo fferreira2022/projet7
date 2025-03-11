@@ -14,21 +14,34 @@
 
                 <div class="container text-center mt-4">
                     <h3>Choisissez un modèle pour obtenir une prédiction :</h3>
-                    <form method="POST" action="{% url 'predict' %}">
+                    <form method="POST" action="{% url 'predict' %}" enctype="multipart/form-data">
                         {% csrf_token %}
+                        
+                        <!-- Sélection du modèle -->
                         <div class="form-group">
                             <select name="model" class="form-control w-50 mx-auto" required>
                                 <option value="" disabled selected>-- Sélectionnez un modèle --</option>
-                                <option value="model1">Modèle 1</option>
-                                <option value="model2">Modèle 2</option>
-                                <option value="model3">Modèle 3</option> <!-- Ajoutez autant de modèles que nécessaire -->
+                                <option value="LogisticRegression">LogisticRegression</option>
+                                {% comment %} <option value="model2">Modèle 2</option> {% endcomment %}
                             </select>
                         </div>
+
+                        <!-- Saisie manuelle des données -->
+                        <div class="form-group mt-3">
+                            <label for="data_input" class="form-label">Saisie manuelle des données (au format JSON) :</label>
+                            <textarea name="data_input" id="data_input" class="form-control w-75 mx-auto" rows="5" placeholder="{'EXT_SOURCE_1': 0.99, 'EXT_SOURCE_2': 0.01, ...}"></textarea>
+                        </div>
+
+                        <!-- Téléchargement de fichier CSV ou JSON -->
+                        <div class="form-group mt-3">
+                            <label for="file_input" class="form-label">Ou téléchargez un fichier (CSV ou JSON) :</label>
+                            <input type="file" name="file_input" id="file_input" accept=".csv, .json" class="form-control-file w-50 mx-auto">
+                        </div>
+                        <p class="text-muted mt-2">Une fois les données soumises, vous serez redirigé vers une page affichant les résultats.</p>
+                        <!-- Bouton de soumission -->
                         <button type="submit" class="btn btn-success mt-3">Obtenir une prédiction</button>
                     </form>
                 </div>
-                
-                
             </div>
         </div>
         <div class='col-md-6 col-sm-12 mb-3 text-bg-dark'>
@@ -37,6 +50,5 @@
     </div>
 </div>
 {% endblock content %}
-
 
 
