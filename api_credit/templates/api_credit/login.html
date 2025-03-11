@@ -1,8 +1,8 @@
 {% extends 'main.html' %}
-{% block title %}Login | Prêt à dépenser{% endblock %}
+{% block title %}Connexion | Prêt à dépenser{% endblock %}
 {% block content %}
     <div class="container homepage_main_div">
-        <h1 class="text-center text-light" id="main_title"><b>Log in</b></h1>
+        <h1 class="text-center text-light" id="main_title"><b>Connexion</b></h1>
         <div class="container card p-3 text-center login_div">
         {% if page == 'login' %}
             <form class="" method="POST" action="">
@@ -18,11 +18,11 @@
                 </div> 
 
                 <!-- Submit button -->
-                    <button type="submit" class="btn btn-outline-success btn-sm w-100" value="Login">Log in</button>
+                    <button type="submit" class="btn btn-outline-success btn-sm w-100" value="Login">Se connecter</button>
                     <br></br>
 
                 <div class="col text-center">
-                    <p>Forgot password?<a class= "btn w-100 a link_style" href="{% url 'reset_password' %}">Reset password</a></p>
+                    <p>Mot de passe oublié ?<a class= "btn w-100 a link_style" href="{% url 'reset_password' %}">Réinitialiser mot de passe</a></p>
                 </div>
                 
             </form>

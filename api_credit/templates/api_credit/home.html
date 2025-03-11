@@ -8,12 +8,12 @@
         <div class='col-md-6 col-sm-12 mb-3'>
             <h1 class="text-center text-light" id="main_title"><b>Hi!</b></h1>
             <div class="container w-100" id="picture_main_div">
-                <p>
-                    Calcule la probabilité qu'un client fasse défaut ! 
-                </p>
+                <h3>
+                    Calculez la probabilité qu'un client fasse défaut 
+                </h3>
 
                 <div class="container text-center mt-4">
-                    <h3>Choisissez un modèle pour obtenir une prédiction :</h3>
+                    <h5>Choisissez un modèle pour obtenir une prédiction :</h5>
                     <form method="POST" action="{% url 'predict' %}" enctype="multipart/form-data">
                         {% csrf_token %}
                         
@@ -34,17 +34,21 @@
 
                         <!-- Téléchargement de fichier CSV ou JSON -->
                         <div class="form-group mt-3">
-                            <label for="file_input" class="form-label">Ou téléchargez un fichier (CSV ou JSON) :</label>
+                            <h5>Ou</h5>
+                            <label for="file_input" class="form-label">Téléchargez un fichier (CSV ou JSON) :</label>
                             <input type="file" name="file_input" id="file_input" accept=".csv, .json" class="form-control-file w-50 mx-auto">
                         </div>
                         <p class="text-muted mt-2">Une fois les données soumises, vous serez redirigé vers une page affichant les résultats.</p>
                         <!-- Bouton de soumission -->
-                        <button type="submit" class="btn btn-success mt-3">Obtenir une prédiction</button>
+                        <button type="submit" class="btn btn-outline-success mt-3">Obtenir une prédiction</button>
                     </form>
                 </div>
             </div>
         </div>
         <div class='col-md-6 col-sm-12 mb-3 text-bg-dark'>
+            <br><br>
+            <img src="{% static '/images/bank.png' %}" class="img-fluid rounded mx-auto d-block w-100">
+            <br>
             <img src="{% static '/images/banner_homepage.png' %}" class="img-fluid rounded mx-auto d-block w-100">
         </div>
     </div>

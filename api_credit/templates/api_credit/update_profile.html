@@ -1,5 +1,5 @@
 {% extends 'main.html' %}
-{% block title %}Profile Update | Frederic Ferreira{% endblock %}
+{% block title %}Mise à jour du profil | Prêt à dépenser{% endblock %}
 {% block content %}
 <br></br>
 <div class="card w-50" id="update_profile-container">
@@ -7,13 +7,13 @@
         <form method="POST" class="">
             {% csrf_token %}
             <br>
-            <h6>Enter your new username:</h6>
+            <h6>Nouveau nom d'utilisateur:</h6>
             {{form.username}}
             <br>
-            <h6>Enter your new email address:</h6>
+            <h6>Nouvelle adresse email:</h6>
             {{form.email}}
             <br/>
-            <center><button type="submit" class="btn btn-outline-success btn-sm w-100">Submit</button></center>
+            <center><button type="submit" class="btn btn-outline-success btn-sm w-100">Soumettre</button></center>
         </form>
     </div>
 </div>
