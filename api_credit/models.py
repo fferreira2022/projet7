@@ -27,3 +27,22 @@ class Register_form(models.Model):
     username = models.CharField(max_length=200)
     password1 = models.CharField(max_length=200)
     password2 = models.CharField(max_length=200)
+    
+class Customer(models.Model):
+    SK_ID_CURR = models.IntegerField(primary_key=True)
+    EXT_SOURCE_1 = models.FloatField(null=True, blank=True)
+    EXT_SOURCE_2 = models.FloatField(null=True, blank=True)
+    EXT_SOURCE_3 = models.FloatField(null=True, blank=True)
+    DAYS_BIRTH = models.IntegerField()
+    DAYS_EMPLOYED = models.FloatField()
+    CODE_GENDER_M = models.BooleanField()
+    CREDIT_INCOME_PERCENT = models.FloatField()
+    ANNUITY_INCOME_PERCENT = models.FloatField()
+    CREDIT_TERM = models.FloatField()
+    AMT_CREDIT = models.FloatField()
+    AMT_ANNUITY = models.FloatField()
+    AMT_INCOME_TOTAL = models.FloatField()
+    DAYS_EMPLOYED_PERCENT = models.FloatField()
+
+    def __str__(self):
+        return f"Customer {self.SK_ID_CURR}"

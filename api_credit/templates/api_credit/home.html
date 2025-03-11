@@ -2,6 +2,66 @@
 {% block title %}Prêt à dépenser | Crédit Scoring{% endblock %}
 {% load static %}
 {% block content %}
+<div class='container homepage_main_div'>
+    <div class='row'>
+        <div class='col-md-6 col-sm-12 mb-3'>
+            <h1 class="text-center text-light" id="main_title"><b>Hi!</b></h1>
+            <div class="container w-100" id="picture_main_div">
+                <h3>
+                    Calculez la probabilité qu'un client fasse défaut
+                </h3>
+
+                <div class="container text-center mt-4">
+                    <h5>Choisissez un modèle et un client pour obtenir une prédiction :</h5>
+                    <form method="POST" action="{% url 'predict' %}">
+                        {% csrf_token %}
+
+                        <!-- Sélection du modèle -->
+                        <div class="form-group mt-3">
+                            <select name="model" class="form-control w-50 mx-auto" required>
+                                <option value="" disabled selected>-- Sélectionnez un modèle --</option>
+                                <option value="LogisticRegression">LogisticRegression</option>
+                                <option value="RandomForestClassifier">RandomForestClassifier</option>
+                                <option value="GrandientBoostingClassifier">GrandientBoostingClassifier</option>
+                            </select>
+                        </div>
+
+                        <!-- Sélection de l'ID Client -->
+                        
+
+                        <div class="form-group mt-5">
+                            <select name="client_id" id="client_id" class="form-control w-50 mx-auto" required>
+                                <option value="" disabled selected>-- Sélectionnez un ID client --</option>
+                                {% for client_id in client_ids %}
+                                    <option value="{{ client_id }}">{{ client_id }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <p class="text-muted mt-2">Une fois les choix effectués, vous serez redirigé vers une page affichant les résultats.</p>
+
+                        <!-- Bouton de soumission -->
+                        <button type="submit" class="btn btn-outline-success mt-3">Obtenir une prédiction</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class='col-md-6 col-sm-12 mb-3 text-bg-dark'>
+            <br><br>
+            <img src="{% static '/images/bank.png' %}" class="img-fluid rounded mx-auto d-block w-100">
+            <br>
+            <img src="{% static '/images/banner_homepage.png' %}" class="img-fluid rounded mx-auto d-block w-100">
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+
+
+{% comment %} {% extends 'main.html' %}
+{% block title %}Prêt à dépenser | Crédit Scoring{% endblock %}
+{% load static %}
+{% block content %}
 {{ redirect_to_login_immediately }} {# <= étape 3 pour installer django_auto_logout #}
 <div class='container homepage_main_div'>
     <div class='row'>
@@ -23,7 +83,7 @@
                                 <option value="" disabled selected>-- Sélectionnez un modèle --</option>
                                 <option value="LogisticRegression">LogisticRegression</option>
                                 {% comment %} <option value="model2">Modèle 2</option> {% endcomment %}
-                            </select>
+                            {% comment %} </select>
                         </div>
 
                         <!-- Saisie manuelle des données -->
@@ -53,6 +113,6 @@
         </div>
     </div>
 </div>
-{% endblock content %}
+{% endblock content %} {% endcomment %}
 
 

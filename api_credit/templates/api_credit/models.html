@@ -1,0 +1,40 @@
+{% extends 'main.html' %}
+{% block title %}Performances des Modèles | Crédit Scoring{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Performances des Modèles</h1>
+    {% if models_metrics %}
+        <table class="table table-bordered table-striped mt-4">
+            <thead class="thead-dark text-center">
+                <tr>
+                    <th>Nom du Modèle</th>
+                    <th>Accuracy</th>
+                    <th>Precision (classe = 1)</th>
+                    <th>Recall (classe = 1)</th>
+                    <th>F1-Score (classe = 1)</th>
+                    <th>ROC_AUC</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for model_name, metrics in models_metrics.items %}
+                <tr class="text-center">
+                    <td>{{ model_name }}</td>
+                    <td>{{ metrics.accuracy|default:"Non disponible" }}</td>
+                    <td>{{ metrics.precision|default:"Non disponible" }}</td>
+                    <td>{{ metrics.recall|default:"Non disponible" }}</td>
+                    <td>{{ metrics.f1_score|default:"Non disponible" }}</td>
+                    <td>{{ metrics.roc_auc|default:"Non disponible" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="alert alert-warning text-center">
+            Aucune donnée de métrique disponible pour les modèles.
+        </p>
+    {% endif %}
+    <div class="text-center mt-4">
+        <a href="{% url 'home' %}" class="btn btn-outline-success">Retourner à la page d'accueil</a>
+    </div>
+</div>
+{% endblock content %}

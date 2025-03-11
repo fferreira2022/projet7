@@ -10,7 +10,7 @@ urlpatterns = [
     path('activate/<uidb64>/<token>/', views.activate, name='activate'),
     path('', views.home, name='home'),
     path('predict/', views.predict, name='predict'),
-    # path('result/', views.result, name='result'),
+    path('models/', views.models_view, name='models'),
     path('profile/<str:pk>/', views.userProfile, name='user-profile'),
     path('update_profile/', views.updateProfile, name='update-profile'),
     

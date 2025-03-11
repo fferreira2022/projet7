@@ -44,7 +44,8 @@ from django.views import View
 from django.views.generic import TemplateView
 from django.urls import reverse
 
-import mlflow.pyfunc  # Utilisé pour charger des modèles MLflow
+import mlflow.pyfunc
+import mlflow # Utilisé pour charger des modèles MLflow
 import json
 import pandas as pd
 
@@ -184,75 +185,223 @@ def delete_account(request):
     else:
         return render(request, 'api_credit/delete_account.html')
     
-
+    
 def predict(request):
     if request.method == 'POST':
         try:
-            # Récupérer le modèle sélectionné par l'utilisateur
+            # Charger les IDs clients
+            csv_path = os.path.join(settings.BASE_DIR, 'static/csv', 'clients.csv')
+            data = pd.read_csv(csv_path)
+            
+            # Récupérer l'ID client sélectionné
+            selected_id = request.POST.get('client_id')
+            client_data = None
+            
+            if selected_id:
+                # Extraire les données correspondantes
+                client_data = data.loc[data['SK_ID_CURR'] == int(selected_id)]
+            
+            # Charger le modèle sélectionné
             selected_model = request.POST.get('model')
             if not selected_model:
                 return JsonResponse({"error": "Veuillez sélectionner un modèle."}, status=400)
             
-            # Charger le modèle LogisticRegression si sélectionné
             if selected_model == 'LogisticRegression':
-                # Définir le chemin absolu vers le modèle
                 model_path = os.path.join(settings.BASE_DIR, 'best_models', 'LogisticRegression.joblib')
-                # Charger le modèle
+                model = load(model_path)
+            elif selected_model == 'RandomForestClassifier':
+                model_path = os.path.join(settings.BASE_DIR, 'best_models', 'RandomForestClassifier.joblib')
+                model = load(model_path)
+            elif selected_model == 'GradientBoostingClassifier':
+                model_path = os.path.join(settings.BASE_DIR, 'best_models', 'GradientBoostingClassifier.joblib')
                 model = load(model_path)
             else:
                 return JsonResponse({"error": f"Le modèle '{selected_model}' n'est pas disponible."}, status=400)
-
-            # Initialiser les données
-            data = None
             
-            # Vérifier les données saisies manuellement
-            data_input = request.POST.get('data_input')
-            if data_input:
-                try:
-                    # Convertir les données JSON saisies en DataFrame
-                    data_dict = json.loads(data_input)
-                    data = pd.DataFrame(data_dict, index=[0]) if isinstance(data_dict, dict) else pd.DataFrame(data_dict)
-                except json.JSONDecodeError:
-                    return JsonResponse({"error": "Les données saisies ne sont pas au format JSON valide."}, status=400)
-
-            # Vérifier le fichier téléchargé
-            file_input = request.FILES.get('file_input')
-            if file_input:
-                if file_input.name.endswith('.csv'):
-                    data = pd.read_csv(file_input)
-                elif file_input.name.endswith('.json'):
-                    data = pd.read_json(file_input)
-                else:
-                    return JsonResponse({"error": "Format de fichier non supporté. Veuillez fournir un fichier CSV ou JSON."}, status=400)
-
-            # Vérifier si des données ont été fournies
-            if data is None:
-                return JsonResponse({"error": "Aucune donnée fournie. Veuillez entrer des données ou télécharger un fichier."}, status=400)
-
-            # Effectuer la prédiction avec le modèle
-            # Séparer SK_ID_CURR des features
-            
-            identifier = int(data['SK_ID_CURR'].values[0])
-            X_features = data.drop(columns=['SK_ID_CURR'])
-            
-            predictions = model.predict(X_features)
-            probability = float(model.predict_proba(X_features)[:, 1])
-            
-            # Préparer et retourner les résultats
-            context = {
-                "SK_ID_CURR": identifier,
-                "model": selected_model,
-                "probability": probability,
-                "predictions": predictions.tolist(),
-            }
-            return render(request, 'api_credit/predict.html', context)
-
+            # faire la prédiction
+            if client_data is not None and not client_data.empty:
+                X_features = client_data.drop(columns=['SK_ID_CURR'])
+                predictions = model.predict(X_features)
+                probability = float(model.predict_proba(X_features)[:, 1])
+                
+                context = {
+                    "SK_ID_CURR": selected_id,
+                    "model": selected_model,
+                    "probability": probability,
+                    "predictions": predictions.tolist(),
+                }
+                return render(request, 'api_credit/predict.html', context)
+            else:
+                return JsonResponse({"error": "ID client non trouvé ou données manquantes."}, status=400)
         except Exception as e:
             return render(request, 'api_credit/predict.html', {"error_message": f"Une erreur est survenue : {str(e)}"})
+        
+    csv_path = os.path.join(settings.BASE_DIR, 'static/csv', 'clients.csv')
+    data = pd.read_csv(csv_path)
+    client_ids = data['SK_ID_CURR'].tolist()
+    
+    return render(request, 'api_credit/home.html', {"client_ids": client_ids})
 
-    return render(request, 'api_credit/predict.html', {"error_message": "Seules les requêtes POST sont acceptées."})
+def get_models_metrics():
+    models_metrics = {}
+    mlruns_path = "mlruns/0"  # Chemin vers le dossier mlruns/0
+
+    if not os.path.exists(mlruns_path):
+        return None
+
+    for model_run in os.listdir(mlruns_path):
+        run_path = os.path.join(mlruns_path, model_run)
+        metrics_path = os.path.join(run_path, "metrics")  # Accéder au sous-dossier "metrics"
+        tags_path = os.path.join(run_path, "tags")  # Accéder au sous-dossier "tags"
+
+        if os.path.isdir(run_path) and os.path.exists(metrics_path):
+            # Récupération des métriques
+            metrics = {}
+            for metric_file in os.listdir(metrics_path):
+                metric_path = os.path.join(metrics_path, metric_file)
+                with open(metric_path, "r") as f:
+                    content = f.read().strip()
+                    values = content.split()
+                    if len(values) > 1:
+                        metrics[metric_file] = float(values[1])  # Seule la deuxième valeur correspond à la métrique
+                    else:
+                        metrics[metric_file] = float(values[0])
+
+            # Récupération du nom du modèle depuis "mlflow.runName"
+            model_name = f"Run {model_run}"  # Valeur par défaut
+            if os.path.exists(tags_path):
+                run_name_path = os.path.join(tags_path, "mlflow.runName")
+                if os.path.exists(run_name_path):
+                    with open(run_name_path, "r") as f:
+                        model_name = f.read().strip()
+
+            # Ajout au dictionnaire final
+            models_metrics[model_name] = metrics
+
+    return models_metrics
+
+def models_view(request):
+    models_metrics = get_models_metrics()
+    return render(request, 'api_credit/models.html', {'models_metrics': models_metrics})
 
 
 
+# def predict(request):
+#     if request.method == 'POST':
+#         try:
+#             # Récupérer le modèle sélectionné par l'utilisateur
+#             selected_model = request.POST.get('model')
+#             if not selected_model:
+#                 return JsonResponse({"error": "Veuillez sélectionner un modèle."}, status=400)
+            
+#             # Charger le modèle LogisticRegression si sélectionné
+#             if selected_model == 'LogisticRegression':
+#                 # Définir le chemin absolu vers le modèle
+#                 model_path = os.path.join(settings.BASE_DIR, 'best_models', 'LogisticRegression.joblib')
+#                 # Charger le modèle
+#                 model = load(model_path)
+#             else:
+#                 return JsonResponse({"error": f"Le modèle '{selected_model}' n'est pas disponible."}, status=400)
+
+#             # Initialiser les données
+#             data = None
+            
+#             # Vérifier les données saisies manuellement
+#             data_input = request.POST.get('data_input')
+#             if data_input:
+#                 try:
+#                     # Convertir les données JSON saisies en DataFrame
+#                     data_dict = json.loads(data_input)
+#                     data = pd.DataFrame(data_dict, index=[0]) if isinstance(data_dict, dict) else pd.DataFrame(data_dict)
+#                 except json.JSONDecodeError:
+#                     return JsonResponse({"error": "Les données saisies ne sont pas au format JSON valide."}, status=400)
+
+#             # Vérifier le fichier téléchargé
+#             file_input = request.FILES.get('file_input')
+#             if file_input:
+#                 if file_input.name.endswith('.csv'):
+#                     data = pd.read_csv(file_input)
+#                 elif file_input.name.endswith('.json'):
+#                     data = pd.read_json(file_input)
+#                 else:
+#                     return JsonResponse({"error": "Format de fichier non supporté. Veuillez fournir un fichier CSV ou JSON."}, status=400)
+
+#             # Vérifier si des données ont été fournies
+#             if data is None:
+#                 return JsonResponse({"error": "Aucune donnée fournie. Veuillez entrer des données ou télécharger un fichier."}, status=400)
+
+#             # Effectuer la prédiction avec le modèle
+#             # Séparer SK_ID_CURR des features
+            
+#             identifier = int(data['SK_ID_CURR'].values[0])
+#             X_features = data.drop(columns=['SK_ID_CURR'])
+            
+#             predictions = model.predict(X_features)
+#             probability = float(model.predict_proba(X_features)[:, 1])
+            
+#             # Préparer et retourner les résultats
+#             context = {
+#                 "SK_ID_CURR": identifier,
+#                 "model": selected_model,
+#                 "probability": probability,
+#                 "predictions": predictions.tolist(),
+#             }
+#             return render(request, 'api_credit/predict.html', context)
+
+#         except Exception as e:
+#             return render(request, 'api_credit/predict.html', {"error_message": f"Une erreur est survenue : {str(e)}"})
+
+#     return render(request, 'api_credit/predict.html', {"error_message": "Seules les requêtes POST sont acceptées."})
+
+
+# def predict(request):
+#     if request.method == 'POST':
+#         try:
+#             # Charger les IDs clients à partir d'un fichier CSV
+#             csv_path = os.path.join(settings.BASE_DIR, 'data', 'clients.csv')  # Exemple : fichier contenant SK_ID_CURR et ses variables
+#             client_data = pd.read_csv(csv_path)
+            
+#             # Récupérer l'ID client sélectionné
+#             selected_id = request.POST.get('client_id')  # Nouveau champ du formulaire
+#             data = None
+            
+#             if selected_id:
+#                 # Extraire les données correspondantes à l'ID sélectionné
+#                 data = client_data[client_data['SK_ID_CURR'] == int(selected_id)]
+            
+#             # Charger le modèle sélectionné
+#             selected_model = request.POST.get('model')
+#             if not selected_model:
+#                 return JsonResponse({"error": "Veuillez sélectionner un modèle."}, status=400)
+
+#             if selected_model == 'LogisticRegression':
+#                 model_path = os.path.join(settings.BASE_DIR, 'best_models', 'LogisticRegression.joblib')
+#                 model = load(model_path)
+#             else:
+#                 return JsonResponse({"error": f"Le modèle '{selected_model}' n'est pas disponible."}, status=400)
+            
+#             if data is not None and not data.empty:
+#                 X_features = data.drop(columns=['SK_ID_CURR'])
+#                 predictions = model.predict(X_features)
+#                 probability = float(model.predict_proba(X_features)[:, 1])
+                
+#                 # Retourner le résultat
+#                 context = {
+#                     "SK_ID_CURR": selected_id,
+#                     "model": selected_model,
+#                     "probability": probability,
+#                     "predictions": predictions.tolist(),
+#                 }
+#                 return render(request, 'api_credit/predict.html', context)
+#             else:
+#                 return JsonResponse({"error": "ID client non trouvé ou données manquantes."}, status=400)
+#         except Exception as e:
+#             return render(request, 'api_credit/predict.html', {"error_message": f"Une erreur est survenue : {str(e)}"})
+    
+#     # Charger les IDs pour les afficher dans la liste déroulante (GET request)
+#     csv_path = os.path.join(settings.BASE_DIR, 'data', 'clients.csv')
+#     client_data = pd.read_csv(csv_path)
+#     client_ids = client_data['SK_ID_CURR'].tolist()
+#     return render(request, 'api_credit/home.html', {"client_ids": client_ids})
 
 
