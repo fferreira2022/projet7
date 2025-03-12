@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api_credit',
+    # 'white_noise.runserver_nostatic', # remove comment to deploy in production
 ]
 
 MIDDLEWARE = [

@@ -30,9 +30,9 @@ class Register_form(models.Model):
     
 class Customer(models.Model):
     SK_ID_CURR = models.IntegerField(primary_key=True)
-    EXT_SOURCE_1 = models.FloatField(null=True, blank=True)
-    EXT_SOURCE_2 = models.FloatField(null=True, blank=True)
-    EXT_SOURCE_3 = models.FloatField(null=True, blank=True)
+    EXT_SOURCE_1 = models.FloatField()
+    EXT_SOURCE_2 = models.FloatField()
+    EXT_SOURCE_3 = models.FloatField()
     DAYS_BIRTH = models.IntegerField()
     DAYS_EMPLOYED = models.FloatField()
     CODE_GENDER_M = models.BooleanField()
