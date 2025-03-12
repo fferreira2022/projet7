@@ -1,4 +1,4 @@
-This repository contains a django application and credit scoring API that predicts whether or not a bank client will repay his or her loans on time. 
+This projet7 repository contains a django application and credit scoring API that predicts whether or not a bank client will repay his or her loans on time. 
 
 The api_credit folder contains several files that build the structure and design of the django application as well as its backend logic. The critical ones are: 
  - views.py : backend of application, contains most of the logic
@@ -12,6 +12,10 @@ The mlruns folder and its 3 subdirectories contains information about the traine
 The best_models directory only contains the 3 best models saved with the joblib module.
 
 The requirements.txt file contains all packages / dependencies used in the virtual environment.
+
+The Ferreira_Frederic_1_notebook_modelisation is a notebook where the exploratory data analysis, feature engineering and training of models were performed.
+
+Finally, the tests folder contains the test_functions.py file where some tests were performed using pytest.
 
 
 
