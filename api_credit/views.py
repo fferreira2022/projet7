@@ -55,16 +55,19 @@ import numpy as np
 
 
 '''
--------------------------------------- Views django ---------------------------
+--------------- Views django | Fichier Backend de l'application --------------
+
+Note: une view django = fonction python
 '''
 
-
+# view de la page d'accueil depuis laquelle l'utilisateur choisi un client
+# et un modèle qui va effectuer une prédiction 
 def home(request):
+    # les données clients sont récupérées depuis la BDD 
     customers = Customer.objects.all()
+    
+    #  et peuvent être consultées (en partie) depuis la page d'accueil
     return render(request, 'api_credit/home.html', context={'all_customers': customers})
-
-def result(request):
-    return render(request, 'api_credit/result.html')
 
 
 # activation du compte après inscription, fait appel au fichier tokens.py
@@ -87,6 +90,7 @@ def activate(request, uidb64, token):
 
 # confirmation de l'adresse email
 def confirm_Email(request, user, to_email):
+    # structure du mail envoyé à l'utilisateur
     mail_subject = 'Confirmer votre adresse email'
     message = render_to_string('api_credit/confirm_email.html', {
         'user': user,
@@ -109,6 +113,9 @@ def signup(request):
         if form.is_valid():
             user = form.save(commit=False)
             user.username = user.username.lower()
+            # si le formulaire est correctement rempli l'utilisateur est 
+            # sauvegardé en BDD avec un statut inactif tant qu'il n'a pas cliqué sur le lien 
+            # d'activation qui lui a été envoyé à l'adresse mail indiquée
             user.is_active = False
             user.save()  
             
@@ -148,7 +155,7 @@ def loginPage(request):
     context ={'page': page}
     return render(request, 'api_credit/login.html', context)
 
-
+# view pour la déconnexion de l'utilisateur
 def logoutUser(request):
     logout(request)
     return redirect('home')
@@ -178,7 +185,7 @@ def updateProfile(request):
     context = {'form': form, 'user': current_user}
     return render(request, 'api_credit/update_profile.html', context)
 
-        
+# suppression du compte de l'utilisateur
 @login_required(login_url='login')
 def delete_account(request):
     if request.method == 'POST':
@@ -190,7 +197,8 @@ def delete_account(request):
         return render(request, 'api_credit/delete_account.html')
 
 
-
+# view qui permet de récupérer les performances d'un modèle depuis le répertoire 
+# mlruns/0
 def get_models_metrics():
     models_metrics = {}
     mlruns_path = "mlruns/0"  # Chemin vers le dossier mlruns/0
@@ -229,39 +237,58 @@ def get_models_metrics():
 
     return models_metrics
 
+# view qui permet d'afficher la page models.html contenant les performances des modèles
 def models_view(request):
     models_metrics = get_models_metrics()
     return render(request, 'api_credit/models.html', {'models_metrics': models_metrics})
 
 
+# -------------------------- Fonction principale | Fonction testée dans test_functions.py  --------------------------
+
+# fonction qui effectue la prédiction pour un client choisi par l'utilisateur
 def predict(request):
     if request.method == 'POST':
         try:
-            # Récupérer le modèle sélectionné
+            # Récupérer le modèle choisi par l'utilisiateur
+            # premier bloc testé dans test_functions.py
             selected_model = request.POST.get('model')
             if not selected_model:
                 return JsonResponse({"error": "Veuillez sélectionner un modèle."}, status=400)
-
+            
+            
+            # récupérer le chemin d'accès à l'un des trois modèles sauvegardés au format joblib
+            # second bloc testé dans test_functions.py avec pytest
             if selected_model == 'LogisticRegression':
                 model_path = os.path.join(settings.BASE_DIR, 'best_models', 'LogisticRegression.joblib')
-                model = load(model_path)
+            elif selected_model == 'RandomForestClassifier':
+                model_path = os.path.join(settings.BASE_DIR, 'best_models', 'RandomForestClassifier.joblib')
+            elif selected_model == 'GradientBoostineClassifier':
+                model_path = os.path.join(settings.BASE_DIR, 'best_models', 'GradientBoostingClassifier.joblib')
             else:
                 return JsonResponse({"error": f"Le modèle '{selected_model}' n'est pas disponible."}, status=400)
+            # charger le modèle
+            model = load(model_path)
 
-            # Récupérer l'ID Client
+            # récupérer l'ID Client
+            # troisème bloc testé dans test_functions.py
             client_id = request.POST.get('client_id')
             if not client_id:
                 return JsonResponse({"error": "Veuillez sélectionner un client."}, status=400)
             
             # Charger les données du client (exemple avec une base de données fictive)
+            # quatrième bloc testé dans test_functions.py
             customers = Customer.objects.all()
             client_data = customers.filter(SK_ID_CURR=client_id).values()
             if not client_data:
                 return JsonResponse({"error": f"Aucune donnée trouvée pour l'ID client {client_id}."}, status=404)
             
             # Convertir les données du client en DataFrame
+            # voir cinquième test dans test_functions.py
             data = pd.DataFrame(client_data)
-            # Effectuer les transformations nécessaires
+            if data.shape[1] != 14:
+                return JsonResponse({"error": "Le nombre de variables n'est pas celui attendu."}, status=400)
+                
+            # Effectuer les transformations log nécessaires sur les variables concernées
             if 'AMT_INCOME_TOTAL' in data.columns:
                 data['AMT_INCOME_TOTAL_log'] = data['AMT_INCOME_TOTAL'].apply(lambda x: np.log1p(x) if x > 0 else 0)
             if 'DAYS_EMPLOYED' in data.columns:
@@ -271,23 +298,39 @@ def predict(request):
             if 'AMT_ANNUITY' in data.columns:
                 data['AMT_ANNUITY_log'] = data['AMT_ANNUITY'].apply(lambda x: np.log1p(x) if x > 0 else 0)
                 
-            # Supprimer les colonnes originales
+            # Supprimer les colonnes originales ayant fait l'objet de la trnasformation log
             columns_to_remove = ['AMT_INCOME_TOTAL', 'DAYS_EMPLOYED', 'CREDIT_INCOME_PERCENT', 'AMT_ANNUITY']
             data.drop(columns=[col for col in columns_to_remove if col in data.columns], inplace=True)
-
             
-            # Préparation des données pour la prédiction
+            
+            # Préparation des données pour la prédiction, la colonne id est retirée
+            # avant que les données ne soient passées dans le pipeline
             X_features = data.drop(columns=['SK_ID_CURR'])
             predictions = model.predict(X_features)
             probability = float(model.predict_proba(X_features)[:, 1])
+            status = None
+            if predictions == 0:
+                status = "Accepté"
+            else:
+                status = "Refusé"
             
-            # Résultat
+              # vérifier que la prediction, la probabilité sont conformes à ce qui est attendu
+            if predictions not in [0, 1]:
+                return JsonResponse({"error": f"La classe prédite n'est pas valide, doit être 0 ou 1 {client_id}."}, status=400)
+            if not (0 <= probability <= 1):
+                return JsonResponse({"error": f"Aucune probabilité n'a été retournée par le modèle {client_id}."}, status=400)
+
+            
+            # Résultats de la prédiction stockés dans le dictinnaire passé dans la requête
             context = {
                 "SK_ID_CURR": client_id,
                 "model": selected_model,
                 "probability": probability,
                 "predictions": predictions.tolist(),
+                "status": status,
             }
+            
+            # résultats affichés dans le template predict.html
             return render(request, 'api_credit/predict.html', context)
 
         except Exception as e:

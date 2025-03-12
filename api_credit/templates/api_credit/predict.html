@@ -2,17 +2,18 @@
 {% block title %}Résultats des Prédictions{% endblock %}
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center">Résultats des Prédictions</h1>
+    <h1 class="text-center">Résultats</h1>
     {% if error_message %}
         <p class="alert alert-danger text-center">
             {{ error_message }}
         </p>
     {% else %}
         <div class="container mt-4">
-            <h3>Détails de la Prédiction :</h3>
-            <p><strong>Identifiant (SK_ID_CURR) :</strong> {{ SK_ID_CURR }}</p>
-            <p><strong>Prédiction :</strong> {{ predictions }}</p>
-            <p><strong>Probabilité d'appartenir à la classe 1 :</strong> {{ probability }}</p>
+            <h3>Détails de la prédiction :</h3>
+            <h5><strong>Identifiant (SK_ID_CURR) :</strong> {{ SK_ID_CURR }}</h5>
+            <h5><strong>Prédiction :</strong> {{ predictions }}</h5>
+            <h5><strong>Statut du prêt :</strong> {{ status }}</h5>
+            <h5><strong>Probabilité de défaut :</strong> {{ probability }}</h5>
         </div>
     {% endif %}
     <div class="text-center mt-4">
@@ -21,26 +22,3 @@
 </div>
 {% endblock %}
 
-
-{% comment %} {% extends 'main.html' %}
-{% block title %}Résultats des Prédictions{% endblock %}
-{% block content %}
-<div class="container mt-5">
-    <h1 class="text-center">Résultats des Prédictions</h1>
-    {% if error_message %}
-        <p class="alert alert-danger text-center">
-            {{ error_message }}
-        </p>
-    {% else %}
-        <div class="container mt-4">
-            <h3>Détails de la Prédiction :</h3>
-            <p><strong>Identifiant (SK_ID_CURR) :</strong> {{ SK_ID_CURR }}</p>
-            <p><strong>Prédiction :</strong> {{ predictions }}</p>
-            <p><strong>Probabilité d'appartenir à la classe 1 :</strong> {{ probability }}</p>
-        </div>
-    {% endif %}
-    <div class="text-center mt-4">
-        <a href="{% url 'home' %}" class="btn btn-outline-success">Retourner à la page d'accueil</a>
-    </div>
-</div>
-{% endblock %} {% endcomment %}
