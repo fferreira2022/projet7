@@ -25,8 +25,8 @@
   height: 70%;
 }
 
-.homepage_main_div {
-  margin-top: 10%;
+#homepage_main_div {
+  margin-top: 7%;
 }
 
 #Portfolio_page_div {
@@ -95,10 +95,6 @@
 .navbar-nav > li {
   margin-left: 30px;
   margin-right: 30px;
-}
-
-.navbar-nav .nav-item .nav-link >h5:hover {
-  color: white !important;
 }
 
 .dropdown_style {
@@ -267,18 +263,7 @@
   text-justify: inter-word;
 }
 
-#US_road_image {
-  margin-top: 6%;
-}
-
-.no-underline a {
-  text-decoration: none;
-}
-
-.centered {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh; /* Adjust this value as needed */
-  text-decoration: none;
+.custom-image-size {
+  width: 120%;
+  height: 120%
 }

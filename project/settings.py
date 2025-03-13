@@ -12,27 +12,30 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# with open(os.path.join(BASE_DIR, 'secret_key.txt')) as f:
-#     SECRET_KEY = f.read().strip()
-    
+# load environment variables
+load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-d$f3!0^f4$2z$ej(gdm90gymzwapmf-@_e_u#3&g+q--rz9q0p'
+with open(os.path.join(BASE_DIR, 'secret_key.txt')) as f:
+    SECRET_KEY = f.read().strip()
+    
+
+# # SECURITY WARNING: keep the secret key used in production secret!
+# SECRET_KEY = 'django-insecure-d$f3!0^f4$2z$ej(gdm90gymzwapmf-@_e_u#3&g+q--rz9q0p'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS = ['https://frederic-ferreira.com', 'frederic-ferreira.com', 'fferreira.up.railway.app', 'https://fferreira.up.railway.app']
-# CSRF_TRUSTED_ORIGINS = ['https://frederic-ferreira.com', 'https://fferreira.up.railway.app']
+ALLOWED_HOSTS = []
+CSRF_TRUSTED_ORIGINS = []
 
 ALLOWED_HOSTS = []
 
@@ -46,7 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'api_credit',
-    # 'white_noise.runserver_nostatic', # remove comment to deploy in production
+    'whitenoise.runserver_nostatic', # remove comment to deploy in production
 ]
 
 MIDDLEWARE = [
@@ -59,7 +62,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'api_credit.admin_middleware.AdminMiddleware',
     'django_auto_logout.middleware.auto_logout', # l'étape 1 pour installer django auto logout (après le pip install django-auto-logout et le pip install pytz), un module qui permet de déconnecter automatiquement l'utilisateur au bout d'un laps de temps de notre choix
-    #  'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -86,24 +89,24 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'railway',
-#         'USER': 'postgres',
-#         'PASSWORD': 'lnorrmnkEoBUNVDvQsVklwDcbBmAdaLI',
-#         'HOST': 'autorack.proxy.rlwy.net',
-#         'PORT': '58950',
-        
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': os.environ.get('DB_PASSWORD_RAILWAY'),
+        'HOST': os.environ.get('RAILWAY_HOST'),
+        'PORT': os.environ.get('RAILWAY_PORT'),
+        
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -143,17 +146,17 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# # whitenoise static files
-# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-# STATIC_ROOT = BASE_DIR / 'staticfiles'
+# whitenoise static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
 # SMTP configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST ='smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'frederic.ferreira66@gmail.com' 
-EMAIL_HOST_PASSWORD = 'esib zjyn kfyl zkdy'
+EMAIL_PORT = 'EMAIL_PORT'
+EMAIL_HOST_USER = 'EMAIL_HOST_USER' 
+EMAIL_HOST_PASSWORD = 'EMAIL_HOST_PASSWORD'
 EMAIL_USE_TLS = True
 
 

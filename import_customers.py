@@ -8,7 +8,7 @@ import csv
 from api_credit.models import Customer  # Remplacez "myapp" par le nom de votre application
 
 # Chemin vers le fichier CSV
-csv_file_path = "static/csv/clients_no_log.csv"
+csv_file_path = "static/csv/clients_test_no_log.csv"
 
 # Lire et insérer uniquement les 10 premières lignes
 with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
