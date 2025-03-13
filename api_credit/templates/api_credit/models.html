@@ -13,6 +13,7 @@
                     <th>Recall (classe = 1)</th>
                     <th>F1-Score (classe = 1)</th>
                     <th>ROC_AUC</th>
+                    <th>Best threshold</th>
                 </tr>
             </thead>
             <tbody>
@@ -24,6 +25,7 @@
                     <td>{{ metrics.recall|default:"Non disponible" }}</td>
                     <td>{{ metrics.f1_score|default:"Non disponible" }}</td>
                     <td>{{ metrics.roc_auc|default:"Non disponible" }}</td>
+                    <td>{{ metrics.optimized_threshold|default:"Non disponible" }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

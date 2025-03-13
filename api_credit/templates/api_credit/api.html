@@ -1,0 +1,87 @@
+{% extends 'main.html' %}
+{% block title %}Prêt à dépenser | Crédit Scoring{% endblock %}
+{% load static %}
+{% block content %}
+<br><br>
+<div class='container homepage_main_div'>
+    <div class='row'>
+        <div class='col-md-6 col-sm-12 mb-3'>
+            <br></br>
+            <div class="container w-100" id="picture_main_div">
+                <div class="form-group mt-3">
+                    <h5 for="customer_dropdown">Consultez les données clients</h5>
+                    <select id="customer_dropdown" name="customer" class="form-control" onchange="showCustomerDetails()">
+                        {% for customer in all_customers %}
+                            <option value="{{ customer.SK_ID_CURR }}"
+                                    data-birth="{{ customer.DAYS_BIRTH }}"
+                                    data-employed="{{ customer.DAYS_EMPLOYED }}"
+                                    data-credit="{{ customer.AMT_CREDIT }}"
+                                    data-income="{{ customer.AMT_INCOME_TOTAL }}">
+                                Identifiant: {{ customer.SK_ID_CURR }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    
+                    <!-- Conteneur pour les détails affichés -->
+                    <ul id="customer_details" style="margin-top: 15px; list-style-type: disc; padding-left: 20px;">
+                        <li>Âge : <span id="detail_birth"></span> (en jours au moment du prêt)</li>
+                        <li>Employé depuis : <span id="detail_employed"></span> jours</li>
+                        <li>Montant du crédit : <span id="detail_credit"></span> €</li>
+                        <li>Revenus annuels: <span id="detail_income"></span> €</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class='col-md-6 col-sm-12 mb-3'>
+            <div class="container text-center mt-4">
+                <h5>Choisissez un modèle et un client pour obtenir une prédiction :</h5>
+                <form method="POST" action="{% url 'predict' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <!-- Sélection du modèle -->
+                    <div class="form-group mt-3">
+                        <label for="model">Modèle :</label>
+                        <select name="model" class="form-control w-50 mx-auto" required>
+                            <option value="" disabled selected>-- Sélectionnez un modèle --</option>
+                            <option value="LogisticRegression">LogisticRegression</option>
+                            <option value="RandomForestClassifier">RandomForestClassifier</option>
+                            <option value="GradientBoostingClassifier">GradientBoostingClassifier</option>
+                        </select>
+                    </div>
+                
+                    <!-- Sélection de l'ID Client depuis la base -->
+                    <div class="form-group mt-5">
+                        <label for="client_id">Identifiant Client :</label>
+                        <select name="client_id" id="client_id" class="form-control w-50 mx-auto" required>
+                            <option value="" disabled selected>-- Sélectionnez un ID client --</option>
+                            {% for customer in all_customers %}
+                                <option value="{{ customer.SK_ID_CURR }}">
+                                    {{ customer.SK_ID_CURR }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% comment %} <p class="text-center">OU</p>
+                
+                    <!-- Entrée manuelle des données JSON -->
+                    <div class="form-group mt-5">
+                        <label for="data_input">Saisissez des données au format JSON :</label>
+                        <textarea name="data_input" id="data_input" class="form-control w-75 mx-auto" rows="5" placeholder='{"SK_ID_CURR":12345, "EXT_SOURCE_1":0.5, ...}'></textarea>
+                    </div>
+                
+                    <p class="text-center">OU</p>
+                
+                    <!-- Téléchargement d'un fichier -->
+                    <div class="form-group mt-3">
+                        <label for="file_input">Téléchargez un fichier de données (CSV ou JSON) :</label>
+                        <input type="file" name="file_input" id="file_input" class="form-control-file mx-auto">
+                    </div> 
+                {% endcomment %}
+                    <!-- Bouton de soumission -->
+                    <button type="submit" class="btn btn-outline-success mt-4">Obtenir une prédiction</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

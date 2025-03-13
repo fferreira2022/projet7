@@ -262,3 +262,8 @@
   text-align: justify;
   text-justify: inter-word;
 }
+
+.custom-image-size {
+  width: 120%;
+  height: 120%
+}

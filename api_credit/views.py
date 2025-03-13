@@ -60,14 +60,20 @@ import numpy as np
 Note: une view django = fonction python
 '''
 
+
+# view de la page d'accueil 
+def home(request):
+    return render(request, 'api_credit/home.html')
+
+
 # view de la page d'accueil depuis laquelle l'utilisateur choisi un client
 # et un modèle qui va effectuer une prédiction 
-def home(request):
+def api(request):
     # les données clients sont récupérées depuis la BDD 
     customers = Customer.objects.all()
     
     #  et peuvent être consultées (en partie) depuis la page d'accueil
-    return render(request, 'api_credit/home.html', context={'all_customers': customers})
+    return render(request, 'api_credit/api.html', context={'all_customers': customers})
 
 
 # activation du compte après inscription, fait appel au fichier tokens.py
@@ -208,11 +214,12 @@ def get_models_metrics():
 
     for model_run in os.listdir(mlruns_path):
         run_path = os.path.join(mlruns_path, model_run)
-        metrics_path = os.path.join(run_path, "metrics")  # Accéder au sous-dossier "metrics"
-        tags_path = os.path.join(run_path, "tags")  # Accéder au sous-dossier "tags"
-
-        if os.path.isdir(run_path) and os.path.exists(metrics_path):
-            # Récupération des métriques
+        metrics_path = os.path.join(run_path, "metrics")  # accéder au sous-dossier "metrics"
+        tags_path = os.path.join(run_path, "tags")  # accéder au sous-dossier "tags"
+        params_path = os.path.join(run_path, "params") # accéder au sous-dossier params
+        
+        if os.path.isdir(run_path) and os.path.exists(metrics_path) and os.path.exists(params_path):
+            # récupération des métriques
             metrics = {}
             for metric_file in os.listdir(metrics_path):
                 metric_path = os.path.join(metrics_path, metric_file)
@@ -223,24 +230,34 @@ def get_models_metrics():
                         metrics[metric_file] = float(values[1])  # Seule la deuxième valeur correspond à la métrique
                     else:
                         metrics[metric_file] = float(values[0])
+                        
+            # récupération du meilleur seuil
+            for params_file in os.listdir(params_path):
+                if params_file.startswith("optimized"):
+                    params_path = os.path.join(params_path, params_file)
+                    with open(params_path, "r") as f:
+                        content = float(f.read().strip())
+                        metrics[params_file] = content
 
-            # Récupération du nom du modèle depuis "mlflow.runName"
+            # récupération du nom du modèle depuis "mlflow.runName"
             model_name = f"Run {model_run}"  # Valeur par défaut
             if os.path.exists(tags_path):
                 run_name_path = os.path.join(tags_path, "mlflow.runName")
                 if os.path.exists(run_name_path):
                     with open(run_name_path, "r") as f:
                         model_name = f.read().strip()
+                        
 
-            # Ajout au dictionnaire final
+            # ajout au dictionnaire final
             models_metrics[model_name] = metrics
 
     return models_metrics
 
 # view qui permet d'afficher la page models.html contenant les performances des modèles
 def models_view(request):
-    models_metrics = get_models_metrics()
-    return render(request, 'api_credit/models.html', {'models_metrics': models_metrics})
+    metrics = get_models_metrics()
+    return render(request, 'api_credit/models.html', 
+                {'models_metrics': metrics})
 
 
 # -------------------------- Fonction principale | Fonction testée dans test_functions.py  --------------------------
@@ -309,10 +326,7 @@ def predict(request):
             predictions = model.predict(X_features)
             probability = float(model.predict_proba(X_features)[:, 1])
             status = None
-            if predictions == 0:
-                status = "Accepté"
-            else:
-                status = "Refusé"
+            status = "Accepté" if predictions == 0 else "Refusé"
             
               # vérifier que la prediction, la probabilité sont conformes à ce qui est attendu
             if predictions not in [0, 1]:
