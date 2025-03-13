@@ -35,7 +35,7 @@ with open(os.path.join(BASE_DIR, 'secret_key.txt')) as f:
 DEBUG = True
 
 ALLOWED_HOSTS = ['projet7-production.up.railway.app', 'https://projet7-production.up.railway.app']
-CSRF_TRUSTED_ORIGINS = ['projet7-production.up.railway.app', 'https://projet7-production.up.railway.app']
+CSRF_TRUSTED_ORIGINS = ['https://projet7-production.up.railway.app']
 
 # ALLOWED_HOSTS = []
 
