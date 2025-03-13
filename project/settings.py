@@ -34,10 +34,10 @@ with open(os.path.join(BASE_DIR, 'secret_key.txt')) as f:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-CSRF_TRUSTED_ORIGINS = []
+ALLOWED_HOSTS = ['projet7-production.up.railway.app', 'https://projet7-production.up.railway.app']
+CSRF_TRUSTED_ORIGINS = ['projet7-production.up.railway.app', 'https://projet7-production.up.railway.app']
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
 
 # Application definition
 
