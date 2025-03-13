@@ -87,7 +87,6 @@ pydantic==2.10.6
 pydantic_core==2.27.2
 Pygments==2.19.1
 pyparsing==3.2.1
-pypiwin32==223
 pytest==8.3.5
 pytest-django==4.10.0
 python-dateutil==2.9.0.post0
