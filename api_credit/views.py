@@ -262,93 +262,114 @@ def models_view(request):
 
 # -------------------------- Fonction principale | Fonction testée dans test_functions.py  --------------------------
 
-# fonction qui effectue la prédiction pour un client choisi par l'utilisateur
+# fonction qui effectue la prédiction pour un client choisi par l'utilisateur test_functions.py  --------------------------
+
+# Exemple de clé API (statique). Vous pouvez utiliser un système dynamique basé sur une base de données.
+VALID_API_KEYS = ['gkih8khkdl*!gg*rrl8944hh4!']
+
+def validate_api_key(request):
+    """
+    Fonction pour valider la clé API à partir des en-têtes de la requête.
+    """
+    api_key = request.headers.get('X-API-KEY')  # Récupérer la clé API des en-têtes
+    if not api_key or api_key not in VALID_API_KEYS:
+        return JsonResponse({"error": "Clé API invalide ou absente."}, status=403)
+
+    return None  # Retourne None si la clé est valide
+
+@csrf_exempt
 def predict(request):
     if request.method == 'POST':
+        # Vérifier si la requête est distante
+        is_remote = not request.headers.get('Cookie')  # Pas de cookie = requête distante
+
+        if is_remote:
+            
+            # Valider la clé API pour les requêtes distantes
+            key_error_response = validate_api_key(request)
+            if key_error_response:
+                return key_error_response  # retourne une erreur si la clé est absente ou invalide
+
         try:
-            # Récupérer le modèle choisi par l'utilisiateur
-            # premier bloc testé dans test_functions.py
-            selected_model = request.POST.get('model')
-            if not selected_model:
-                return JsonResponse({"error": "Veuillez sélectionner un modèle."}, status=400)
-            
-            
-            # récupérer le chemin d'accès à l'un des trois modèles sauvegardés au format joblib
-            # second bloc testé dans test_functions.py avec pytest
-            if selected_model == 'LogisticRegression':
-                model_path = os.path.join(settings.BASE_DIR, 'best_models', 'LogisticRegression.joblib')
-            elif selected_model == 'RandomForestClassifier':
-                model_path = os.path.join(settings.BASE_DIR, 'best_models', 'RandomForestClassifier.joblib')
-            elif selected_model == 'GradientBoostineClassifier':
-                model_path = os.path.join(settings.BASE_DIR, 'best_models', 'GradientBoostingClassifier.joblib')
+            if is_remote:
+                selected_model = 'LogisticRegression'
+                # gestion des requêtes distantes
+                if request.content_type != 'application/json':
+                    return JsonResponse({"error": "Le format de la requête doit être JSON."}, status=400)
+                
+                try:
+                    request_data = json.loads(request.body)  # Charger les données JSON
+                except json.JSONDecodeError:
+                    return JsonResponse({"error": "Données JSON invalides."}, status=400)
+
+                input_data = pd.DataFrame([request_data])  # Convertir en DataFrame
+                if input_data.shape[1] != 14:  # vérifier si le nombre de colonnes est correct
+                    return JsonResponse({"error": "Le nombre de variables est incorrect."}, status=400)
+
             else:
-                return JsonResponse({"error": f"Le modèle '{selected_model}' n'est pas disponible."}, status=400)
-            # charger le modèle
+                # Gestion des requêtes locales (utilisateurs inscrits)
+                selected_model = request.POST.get('model')
+                client_id = request.POST.get('client_id')
+                
+                if not selected_model:
+                    return render(request, 'api_credit/predict.html', {"error_message": "Veuillez sélectionner un modèle."})
+                
+                if client_id:
+                    # chargement des données client
+                    customers = Customer.objects.all()
+                    client_data = customers.filter(SK_ID_CURR=client_id).values()
+                    if not client_data:
+                        return render(request, 'api_credit/predict.html', {"error_message": f"Aucune donnée trouvée pour l'ID client {client_id}."})
+                    
+                    input_data = pd.DataFrame(client_data)  # Convertir en DataFrame
+                    
+
+            # Transformation log et suppression des colonnes inutiles
+            if 'AMT_INCOME_TOTAL' in input_data.columns:
+                input_data['AMT_INCOME_TOTAL_log'] = input_data['AMT_INCOME_TOTAL'].apply(lambda x: np.log1p(x) if x > 0 else 0)
+            if 'DAYS_EMPLOYED' in input_data.columns:
+                input_data['DAYS_EMPLOYED_log'] = input_data['DAYS_EMPLOYED'].apply(lambda x: np.log1p(abs(x)) if x < 0 else 0)
+            if 'CREDIT_INCOME_PERCENT' in input_data.columns:
+                input_data['CREDIT_INCOME_PERCENT_log'] = input_data['CREDIT_INCOME_PERCENT'].apply(lambda x: np.log1p(x) if x > 0 else 0)
+            if 'AMT_ANNUITY' in input_data.columns:
+                input_data['AMT_ANNUITY_log'] = input_data['AMT_ANNUITY'].apply(lambda x: np.log1p(x) if x > 0 else 0)
+
+            columns_to_remove = ['AMT_INCOME_TOTAL', 'DAYS_EMPLOYED', 'CREDIT_INCOME_PERCENT', 'AMT_ANNUITY']
+            input_data.drop(columns=[col for col in columns_to_remove if col in input_data.columns], inplace=True)
+
+            # Charger le modèle
+            model_path = os.path.join(settings.BASE_DIR, 'best_models', f"{selected_model}.joblib")
             model = load(model_path)
 
-            # récupérer l'ID Client
-            # troisème bloc testé dans test_functions.py
-            client_id = request.POST.get('client_id')
-            if not client_id:
-                return JsonResponse({"error": "Veuillez sélectionner un client."}, status=400)
-            
-            # Charger les données du client (exemple avec une base de données fictive)
-            # quatrième bloc testé dans test_functions.py
-            customers = Customer.objects.all()
-            client_data = customers.filter(SK_ID_CURR=client_id).values()
-            if not client_data:
-                return JsonResponse({"error": f"Aucune donnée trouvée pour l'ID client {client_id}."}, status=404)
-            
-            # Convertir les données du client en DataFrame
-            # voir cinquième test dans test_functions.py
-            data = pd.DataFrame(client_data)
-            if data.shape[1] != 14:
-                return JsonResponse({"error": "Le nombre de variables n'est pas celui attendu."}, status=400)
-                
-            # Effectuer les transformations log nécessaires sur les variables concernées
-            if 'AMT_INCOME_TOTAL' in data.columns:
-                data['AMT_INCOME_TOTAL_log'] = data['AMT_INCOME_TOTAL'].apply(lambda x: np.log1p(x) if x > 0 else 0)
-            if 'DAYS_EMPLOYED' in data.columns:
-                data['DAYS_EMPLOYED_log'] = data['DAYS_EMPLOYED'].apply(lambda x: np.log1p(abs(x)) if x < 0 else 0)
-            if 'CREDIT_INCOME_PERCENT' in data.columns:
-                data['CREDIT_INCOME_PERCENT_log'] = data['CREDIT_INCOME_PERCENT'].apply(lambda x: np.log1p(x) if x > 0 else 0)
-            if 'AMT_ANNUITY' in data.columns:
-                data['AMT_ANNUITY_log'] = data['AMT_ANNUITY'].apply(lambda x: np.log1p(x) if x > 0 else 0)
-                
-            # Supprimer les colonnes originales ayant fait l'objet de la trnasformation log
-            columns_to_remove = ['AMT_INCOME_TOTAL', 'DAYS_EMPLOYED', 'CREDIT_INCOME_PERCENT', 'AMT_ANNUITY']
-            data.drop(columns=[col for col in columns_to_remove if col in data.columns], inplace=True)
-            
-            
-            # Préparation des données pour la prédiction, la colonne id est retirée
-            # avant que les données ne soient passées dans le pipeline
-            X_features = data.drop(columns=['SK_ID_CURR'])
+            # Réaliser les prédictions
+            X_features = input_data.drop(columns=['SK_ID_CURR'], errors='ignore')
             predictions = model.predict(X_features)
             probability = float(model.predict_proba(X_features)[:, 1])
-            status = None
+            
             status = "Accepté" if predictions == 0 else "Refusé"
-            
-              # vérifier que la prediction, la probabilité sont conformes à ce qui est attendu
-            if predictions not in [0, 1]:
-                return JsonResponse({"error": f"La classe prédite n'est pas valide, doit être 0 ou 1 {client_id}."}, status=400)
-            if not (0 <= probability <= 1):
-                return JsonResponse({"error": f"Aucune probabilité n'a été retournée par le modèle {client_id}."}, status=400)
+            status_class = "text-success" if predictions == 0 else "text-danger"
 
-            
-            # Résultats de la prédiction stockés dans le dictinnaire passé dans la requête
+            # Résultats
             context = {
-                "SK_ID_CURR": client_id,
-                "model": selected_model,
+                "source": "Requête distante" if is_remote else "Utilisateur inscrit",
+                "SK_ID_CURR": "" if is_remote else client_id,
                 "probability": probability,
                 "predictions": predictions.tolist(),
                 "status": status,
+                "status_class": status_class,
             }
-            
-            # résultats affichés dans le template predict.html
-            return render(request, 'api_credit/predict.html', context)
+
+            # Retour des résultats
+            if is_remote:
+                return JsonResponse(context, status=200)
+            else:
+                return render(request, 'api_credit/predict.html', context)
 
         except Exception as e:
-            return render(request, 'api_credit/predict.html', {"error_message": f"Une erreur est survenue : {str(e)}"})
+            if is_remote:
+                return JsonResponse({"error": f"Une erreur est survenue : {str(e)}"}, status=500)
+            else:
+                return render(request, 'api_credit/predict.html', {"error_message": f"Une erreur est survenue : {str(e)}"})
 
-    return render(request, 'api_credit/predict.html', {"error_message": "Seules les requêtes POST sont acceptées."})
+    return JsonResponse({"error": "Seules les requêtes POST sont acceptées."}, status=405)
 

@@ -3,7 +3,7 @@
 {% block content %}
     <div class="container homepage_main_div">
         <br><br>
-        <h1 class="text-center text-light" id="main_title"><b>Connexion</b></h1>
+        <h1 class="text-center" id="main_title"><b>Connexion</b></h1>
         <div class="container card p-3 text-center login_div">
         {% if page == 'login' %}
             <form class="" method="POST" action="">
@@ -20,7 +20,7 @@
 
                 <!-- Submit button -->
                     <button type="submit" class="btn btn-outline-success btn-sm w-100" value="Login">Se connecter</button>
-                    <br></br>
+                    <br><br>
 
                 <div class="col text-center">
                     <p>Mot de passe oublié ?<a class= "btn w-100 a link_style" href="{% url 'reset_password' %}">Réinitialiser mot de passe</a></p>
@@ -36,5 +36,3 @@
         <p style="color: red;">{{message}}</p>
     </div>
 {% endfor %}
-
-

@@ -12,7 +12,13 @@
             <h3>Détails de la prédiction :</h3>
             <h5><strong>Identifiant (SK_ID_CURR) :</strong> {{ SK_ID_CURR }}</h5>
             <h5><strong>Prédiction :</strong> {{ predictions }}</h5>
-            <h5><strong>Statut du prêt :</strong> {{ status }}</h5>
+            <h5>
+                <strong>Statut du prêt :</strong>
+                <span class="{{ status_class }}">
+                    {{ status }}
+                </span>
+            </h5>
+            
             <h5><strong>Probabilité de défaut :</strong> {{ probability }}</h5>
         </div>
     {% endif %}

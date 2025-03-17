@@ -35,7 +35,7 @@ class Customer(models.Model):
     EXT_SOURCE_3 = models.FloatField()
     DAYS_BIRTH = models.IntegerField()
     DAYS_EMPLOYED = models.FloatField()
-    CODE_GENDER_M = models.BooleanField()
+    CODE_GENDER_M = models.BooleanField(default=False)
     CREDIT_INCOME_PERCENT = models.FloatField()
     ANNUITY_INCOME_PERCENT = models.FloatField()
     CREDIT_TERM = models.FloatField()
@@ -43,6 +43,18 @@ class Customer(models.Model):
     AMT_ANNUITY = models.FloatField()
     AMT_INCOME_TOTAL = models.FloatField()
     DAYS_EMPLOYED_PERCENT = models.FloatField()
+    NAME_INCOME_TYPE_Businessman = models.BooleanField(default=False)
+    NAME_INCOME_TYPE_Commercial_associate = models.BooleanField(default=False)
+    NAME_INCOME_TYPE_Pensioner = models.BooleanField(default=False)
+    NAME_INCOME_TYPE_State_servant = models.BooleanField(default=False)
+    NAME_INCOME_TYPE_Student = models.BooleanField(default=False)
+    NAME_INCOME_TYPE_Unemployed = models.BooleanField(default=False)
+    NAME_INCOME_TYPE_Working = models.BooleanField(default=False)
+    NAME_EDUCATION_TYPE_Academic_degree = models.BooleanField(default=False)
+    NAME_EDUCATION_TYPE_Higher_education = models.BooleanField(default=False)
+    NAME_EDUCATION_TYPE_Incomplete_higher = models.BooleanField(default=False)
+    NAME_EDUCATION_TYPE_Lower_secondary = models.BooleanField(default=False)
+    NAME_EDUCATION_TYPE_Secondary_secondary_special = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Customer {self.SK_ID_CURR}"
