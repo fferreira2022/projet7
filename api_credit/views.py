@@ -158,7 +158,7 @@ def predict(request):
                     return JsonResponse({"error": "Données JSON invalides."}, status=400)
 
                 input_data = pd.DataFrame([request_data])  # Convertir en DataFrame
-                if input_data.shape[1] != 14:  # Vérifier si le nombre de colonnes est correct
+                if input_data.shape[1] != 26:  # Vérifier si le nombre de colonnes est correct
                     return JsonResponse({"error": "Le nombre de variables est incorrect."}, status=400)
 
             else:
@@ -189,11 +189,11 @@ def predict(request):
             input_data.drop(columns=[col for col in columns_to_remove if col in input_data.columns], inplace=True)
 
             # Charger le modèle imposé (en l'occurrence LogisticRegression)
-            model = get_model("LogisticRegression", 9)
+            model = get_model("LogisticRegression", 10)
 
             # récupérer le seuil logué dans MLflow
             client = MlflowClient()
-            run_id = "b3673c2d8d994f8083a5344610faddcb"  
+            run_id = "6a092d75528f46c0bf4fbf1cb5f93daf"  
             metrics = client.get_run(run_id).data.metrics
             threshold = metrics.get("best_threshold", None)  # Récupération du seuil (par défaut None s'il est absent)
             if threshold is not None:
@@ -222,7 +222,7 @@ def predict(request):
 
             if not is_remote:
                 # Charger l'explainer LIME depuis MLflow
-                lime_artifact_path = mlflow.artifacts.download_artifacts("mlflow-artifacts:/204207475808123679/b3673c2d8d994f8083a5344610faddcb/artifacts/explainers/lime_explainer_params.joblib")
+                lime_artifact_path = mlflow.artifacts.download_artifacts("mlflow-artifacts:/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/artifacts/explainers/lime_explainer_params.joblib")
 
                 # reconstruction d'explainer LIME à partir de paramètres sauvegardés
                 params = joblib.load(lime_artifact_path)  # Si c'est un dict
@@ -265,9 +265,11 @@ def predict(request):
                 # Ajouter le chemin statique au contexte
                 context["lime_graph"] = f'images/lime_graph_{client_id}.png'
 
-
-            # Retour des résultats pour les utilisateurs inscrits
-            return render(request, 'api_credit/predict.html', context)
+            # Retour des résultats
+            if is_remote:
+                return JsonResponse(context, status=200)  # Réponse en JSON pour les requêtes distantes
+            else:
+                return render(request, 'api_credit/predict.html', context)
 
         except Exception as e:
             if is_remote:
