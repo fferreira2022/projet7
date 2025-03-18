@@ -29,7 +29,7 @@ from django.core.mail import EmailMessage
 from .tokens import account_activation_token
 import uuid 
 
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.http import JsonResponse
 
 from django.conf import settings
@@ -76,6 +76,7 @@ load_dotenv()
 --------------- Views django | Fichier Backend de l'application --------------
 
 Note: une view django = fonction python
+
 '''
 
 
@@ -115,14 +116,14 @@ def validate_api_key(request):
     """
     Fonction pour valider la clé API à partir des en-têtes de la requête.
     """
-    api_key = request.headers.get('X-API-KEY')  # Récupérer la clé API des en-têtes
+    api_key = request.headers.get('X-API-KEY')  # récupérer la clé API dans les headers
     if not api_key or api_key != VALID_API_KEY:
         return JsonResponse({"error": "Clé API invalide ou absente."}, status=403)
 
-    return None  # Retourne None si la clé est valide
+    return None  # retourne None si la clé est valide ou une erreur sinon
 
 
-# le récupérer directement depuis mlflow ui
+# récupérer le modèle directement depuis mlflow ui
 def get_model(name, version):
     """
     Fonction pour charger un modèle MLflow scikit-learn par son nom et sa version.
@@ -137,45 +138,53 @@ def get_model(name, version):
 @csrf_exempt
 def predict(request):
     if request.method == 'POST':
-        # Vérifier si la requête est distante
-        is_remote = not request.headers.get('Cookie')  # Pas de cookie = requête distante
+        # on vérifie si la requête est distante 
+        is_remote = not request.headers.get('Cookie')  # Pas de cookie dans les headers = requête distante
+        
+        if not is_remote:  # Si c'est une requête locale
+            # appliquer dynamiquement la protection CSRF aux requêtes locales
+            # de façon à contourner l'ajout du décorateur @csrf_exempt pour les requêtes distantes
+            csrf_protect(lambda req: None)(request)
 
         if is_remote:
-            # Valider la clé API pour les requêtes distantes
+            # si la requête est distante il faut fournir une clé API valide pour aller plus loin
             key_error_response = validate_api_key(request)
             if key_error_response:
-                return key_error_response  # Retourne une erreur si la clé est absente ou invalide
+                return key_error_response  # on retourne une erreur si la clé est absente ou invalide
 
         try:
             if is_remote:
-                # Gestion des requêtes distantes
+                # gestion des requêtes distantes
+                # si la valeur de Content-Type est différente de application/json...
                 if request.content_type != 'application/json':
                     return JsonResponse({"error": "Le format de la requête doit être JSON."}, status=400)
 
                 try:
-                    request_data = json.loads(request.body)  # Charger les données JSON
+                    request_data = json.loads(request.body)  # charger les données json
                 except json.JSONDecodeError:
                     return JsonResponse({"error": "Données JSON invalides."}, status=400)
 
-                input_data = pd.DataFrame([request_data])  # Convertir en DataFrame
-                if input_data.shape[1] != 26:  # Vérifier si le nombre de colonnes est correct
+                input_data = pd.DataFrame([request_data])  # convertir en DataFrame
+                if input_data.shape[1] != 26:  # vérifier si le nombre de colonnes est correct
                     return JsonResponse({"error": "Le nombre de variables est incorrect."}, status=400)
 
             else:
-                # Gestion des requêtes locales (utilisateurs inscrits)
+                # gestion des requêtes locales (utilisateurs inscrits)
                 client_id = request.POST.get('client_id')
                 if not client_id:
-                    return render(request, 'api_credit/predict.html', {"error_message": "Veuillez sélectionner un ID client."})
+                    return render(request, 'api_credit/predict.html', 
+                                {"error_message": "Veuillez sélectionner un ID client."})
 
-                # Chargement des données client
+                # chargement des données client
                 customers = Customer.objects.all()
                 client_data = customers.filter(SK_ID_CURR=client_id).values()
                 if not client_data:
-                    return render(request, 'api_credit/predict.html', {"error_message": f"Aucune donnée trouvée pour l'ID client {client_id}."})
+                    return render(request, 'api_credit/predict.html', 
+                                {"error_message": f"Aucune donnée trouvée pour l'ID client {client_id}."})
 
                 input_data = pd.DataFrame(client_data)  # Convertir en DataFrame
 
-            # Transformation log et suppression des colonnes inutiles
+            # transformation log et suppression des colonnes inutiles
             if 'AMT_INCOME_TOTAL' in input_data.columns:
                 input_data['AMT_INCOME_TOTAL_log'] = input_data['AMT_INCOME_TOTAL'].apply(lambda x: np.log1p(x) if x > 0 else 0)
             if 'DAYS_EMPLOYED' in input_data.columns:
@@ -188,8 +197,20 @@ def predict(request):
             columns_to_remove = ['AMT_INCOME_TOTAL', 'DAYS_EMPLOYED', 'CREDIT_INCOME_PERCENT', 'AMT_ANNUITY']
             input_data.drop(columns=[col for col in columns_to_remove if col in input_data.columns], inplace=True)
 
-            # Charger le modèle imposé (en l'occurrence LogisticRegression)
+            #------------------ Processus commun aux requêtes distantes et locales (via l'application) -------------------
+            
+            # charger le modèle imposé (en l'occurrence LogisticRegression)
             model = get_model("LogisticRegression", 10)
+            
+            print(f"Modèle chargé : {model}")
+            print(f"Requête distante : {is_remote}")
+            
+            if model is None and is_remote:
+                return JsonResponse({"error": "Le modèle est introuvable."}, status=500)
+            if model is None and not is_remote:
+                return render(request, 'api_credit/predict.html', 
+                                {"error_message": "Erreur lors du chargement du modèle."})
+                
 
             # récupérer le seuil logué dans MLflow
             client = MlflowClient()
@@ -204,12 +225,27 @@ def predict(request):
             predictions = model.predict(X_features)
             # probability = float(model.predict_proba(X_features)[:, 1])
             probability = round(float(model.predict_proba(X_features)[:, 1]), 3)
+            
+            if predictions not in [0, 1]:
+                if is_remote:
+                    return JsonResponse({"error": "La prédiction doit être 0 ou 1"}, status=400)
+                if not is_remote:
+                    return render(request, 'api_credit/predict.html', 
+                                {"error_message": "La prédiction doit être 0 ou 1"})
+                    
+            if not 0 <= probability <= 1:
+                if is_remote:
+                    return JsonResponse({"error": "La probabilité doit être comprise en 0 et 1"}, status=400)
+                if not is_remote:
+                    return render(request, 'api_credit/predict.html', 
+                                {"error_message": "La probabilité doit être comprise en 0 et 1"})
+                
 
 
             status = "Accepté" if predictions == 0 else "Refusé"
             status_class = "text-success" if predictions == 0 else "text-danger"
 
-            # Résultats
+            # stocker les résultats dans le dictionnaire context
             context = {
                 "source": "Requête distante" if is_remote else "Utilisateur inscrit",
                 "SK_ID_CURR": "" if is_remote else client_id,
@@ -219,6 +255,8 @@ def predict(request):
                 "status_class": status_class,
                 "threshold": threshold 
             }
+            
+            #------------------ fin du processus commun -----------------
 
             if not is_remote:
                 # Charger l'explainer LIME depuis MLflow
@@ -265,7 +303,7 @@ def predict(request):
                 # Ajouter le chemin statique au contexte
                 context["lime_graph"] = f'images/lime_graph_{client_id}.png'
 
-            # Retour des résultats
+            # envoi des résultats au format json si requête distante, au format html sinon
             if is_remote:
                 return JsonResponse(context, status=200)  # Réponse en JSON pour les requêtes distantes
             else:
@@ -275,7 +313,8 @@ def predict(request):
             if is_remote:
                 return JsonResponse({"error": f"Une erreur est survenue : {str(e)}"}, status=500)
             else:
-                return render(request, 'api_credit/predict.html', {"error_message": f"Une erreur est survenue : {str(e)}"})
+                return render(request, 'api_credit/predict.html', 
+                                {"error_message": f"Une erreur est survenue : {str(e)}"})
 
     return JsonResponse({"error": "Seules les requêtes POST sont acceptées."}, status=405)
 
