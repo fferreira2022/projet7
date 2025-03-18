@@ -1,4 +1,5 @@
 {% extends 'main.html' %}
+{% load static %}
 {% block title %}Résultats des Prédictions{% endblock %}
 {% block content %}
 <div class="container mt-5">
@@ -8,23 +9,38 @@
             {{ error_message }}
         </p>
     {% else %}
-        <div class="container mt-4">
-            <h3>Détails de la prédiction :</h3>
-            <h5><strong>Identifiant (SK_ID_CURR) :</strong> {{ SK_ID_CURR }}</h5>
-            <h5><strong>Prédiction :</strong> {{ predictions }}</h5>
-            <h5>
-                <strong>Statut du prêt :</strong>
-                <span class="{{ status_class }}">
-                    {{ status }}
-                </span>
-            </h5>
-            
-            <h5><strong>Probabilité de défaut :</strong> {{ probability }}</h5>
+        <div class="row mt-4">
+            <!-- Colonne des résultats -->
+            <div class="col-md-4">
+                <h3>Détails de la prédiction :</h3>
+                <h5><strong>Identifiant (SK_ID_CURR) :</strong> {{ SK_ID_CURR }}</h5>
+                <h5><strong>Prédiction :</strong> {{ predictions }}</h5>
+                <h5>
+                    <strong>Statut du prêt :</strong>
+                    <span class="{{ status_class }}">
+                        {{ status }}
+                    </span>
+                </h5>
+                <h5><strong>Probabilité de défaut :</strong> {{ probability }}</h5>
+                <h5><strong>Seuil :</strong> {{ threshold }}</h5>
+            </div>
+
+            <!-- Colonne du graphique -->
+            <div class="col-md-8 text-center">
+                <h5><strong>Feature Importance Locale :</strong></h5>
+                {% if lime_graph %}
+                    <img src="{% static lime_graph %}" alt="Graphique LIME" class="img-fluid rounded mx-auto d-block">
+                {% else %}
+                    <p>Aucun graphique disponible pour ce client.</p>
+                {% endif %}
+            </div>
         </div>
     {% endif %}
     <div class="text-center mt-4">
-        <a href="{% url 'home' %}" class="btn btn-outline-success">Retourner à la page d'accueil</a>
+        <a href="{% url 'api' %}" class="btn btn-outline-success">Retourner à l'estimateur</a>
     </div>
 </div>
 {% endblock %}
+
+
 

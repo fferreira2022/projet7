@@ -58,3 +58,4 @@ class Customer(models.Model):
 
     def __str__(self):
         return f"Customer {self.SK_ID_CURR}"
+

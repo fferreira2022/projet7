@@ -9,11 +9,12 @@
             <br><br>
             <div class="container w-100" id="picture_main_div">
                 <div class="form-group mt-3">
-                    <h5 for="customer_dropdown">Consultez les données clients</h5>
+                    <h3 for="customer_dropdown">Choisir un client</h3>
                     <select id="customer_dropdown" name="customer" class="form-control" onchange="showCustomerDetails()">
                         {% for customer in all_customers %}
                             <option value="{{ customer.SK_ID_CURR }}"
                                     data-birth="{{ customer.DAYS_BIRTH }}"
+                                    data-gender="{{ customer.CODE_GENDER_M }}"
                                     data-employed="{{ customer.DAYS_EMPLOYED }}"
                                     data-credit="{{ customer.AMT_CREDIT }}"
                                     data-income="{{ customer.AMT_INCOME_TOTAL }}">
@@ -22,12 +23,13 @@
                         {% endfor %}
                     </select>
                     
-                    <!-- Conteneur pour les détails affichés -->
+                    <!-- détails client -->
                     <ul id="customer_details" style="margin-top: 15px; list-style-type: disc; padding-left: 20px;">
-                        <li>Âge : <span id="detail_birth"></span> (en jours au moment du prêt)</li>
-                        <li>Employé depuis : <span id="detail_employed"></span> jours</li>
-                        <li>Montant du crédit : <span id="detail_credit"></span> €</li>
-                        <li>Revenus annuels: <span id="detail_income"></span> €</li>
+                        <li><h5>Âge : <span id="detail_birth"></span> (en jours au moment du prêt)</5></li>
+                        <li><h5>Sexe : <span id="detail_gender"></span></5></li>
+                        <li><h5>Employé depuis : <span id="detail_employed"></span> jours</5></li>
+                        <li><h5>Montant du crédit : <span id="detail_credit"></span> €</5></li>
+                        <li><h5>Revenus annuels: <span id="detail_income"></span> €</5></li>
                     </ul>
                 </div>
             </div>
@@ -35,24 +37,21 @@
         <div class='col-md-6 col-sm-12 mb-3'>
             <br><br>
             <div class="container text-center mt-4">
-                <h5>Choisissez un modèle et un client pour obtenir une prédiction :</h5>
+                <h3>Choisir un modèle</h3>
                 <form method="POST" action="{% url 'predict' %}" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <!-- Sélection du modèle -->
+                    <!-- sélection du modèle -->
                     <div class="form-group mt-3">
-                        <label for="model">Modèle :</label>
                         <select name="model" class="form-control w-50 mx-auto" required>
                             <option value="" disabled selected>-- Sélectionnez un modèle --</option>
                             <option value="LogisticRegression">LogisticRegression</option>
-                            <option value="RandomForestClassifier">RandomForestClassifier</option>
-                            <option value="GradientBoostingClassifier">GradientBoostingClassifier</option>
                         </select>
                     </div>
 
-                     <!-- Champ caché pour l'ID du client -->
+                     <!-- C=champ caché pour l'id du client -->
                      <input type="hidden" id="client_id" name="client_id" value="">
 
-                    <!-- Bouton de soumission -->
+                    <!-- bouton de soumission -->
                     <button type="submit" class="btn btn-outline-success mt-4">Obtenir une prédiction</button>
                 </form>
             </div>

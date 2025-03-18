@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from typing import Any, Dict
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
@@ -46,13 +47,30 @@ from django.urls import reverse
 
 import mlflow.pyfunc
 import mlflow # Utilisé pour charger des modèles MLflow
+from mlflow.sklearn import load_model
+from mlflow.tracking import MlflowClient
+
 import json
 import pandas as pd
 
+import joblib
 from joblib import load
+import pickle
 from django.shortcuts import get_object_or_404
 import numpy as np
 
+import lime.lime_tabular
+import matplotlib
+matplotlib.use('Agg')  # Utilise le backend sans interface graphique
+import matplotlib.pyplot as plt
+
+from django.templatetags.static import static
+
+from lime.lime_tabular import LimeTabularExplainer
+
+
+# load environment variables
+load_dotenv()
 
 '''
 --------------- Views django | Fichier Backend de l'application --------------
@@ -66,14 +84,199 @@ def home(request):
     return render(request, 'api_credit/home.html')
 
 
-# view de la page d'accueil depuis laquelle l'utilisateur choisi un client
+# view de la page depuis laquelle l'utilisateur choisi un client
 # et un modèle qui va effectuer une prédiction 
 def api(request):
-    # les données clients sont récupérées depuis la BDD 
-    customers = Customer.objects.all()
-    
-    #  et peuvent être consultées (en partie) depuis la page d'accueil
+    # afficher certaines données client 
+    customers = Customer.objects.values(
+        'SK_ID_CURR',
+        'DAYS_BIRTH',
+        'CODE_GENDER_M',
+        'DAYS_EMPLOYED',
+        'AMT_CREDIT',
+        'AMT_INCOME_TOTAL'
+    )
+    #  # Ajoutez un débogage pour vérifier les valeurs
+    # import pprint
+    # pprint.pprint(list(customers))  # Affiche les données dans la console
+    # Renvoyer le contexte
     return render(request, 'api_credit/api.html', context={'all_customers': customers})
+
+
+
+# -------------------------- Fonction principale | Fonction testée dans test_functions.py  --------------------------
+
+# fonction qui effectue la prédiction pour un client choisi par l'utilisateur test_functions.py  --------------------------
+
+# Exemple de clé API (statique). Vous pouvez utiliser un système dynamique basé sur une base de données.
+VALID_API_KEY = os.environ.get('VALID_API_KEY')
+
+def validate_api_key(request):
+    """
+    Fonction pour valider la clé API à partir des en-têtes de la requête.
+    """
+    api_key = request.headers.get('X-API-KEY')  # Récupérer la clé API des en-têtes
+    if not api_key or api_key != VALID_API_KEY:
+        return JsonResponse({"error": "Clé API invalide ou absente."}, status=403)
+
+    return None  # Retourne None si la clé est valide
+
+
+# le récupérer directement depuis mlflow ui
+def get_model(name, version):
+    """
+    Fonction pour charger un modèle MLflow scikit-learn par son nom et sa version.
+    """
+    try:
+        model = load_model(f"models:/{name}/{version}")
+        return model
+    except Exception as e:
+        raise ValueError(f"Erreur lors du chargement du modèle {name} version {version} : {str(e)}")
+
+
+@csrf_exempt
+def predict(request):
+    if request.method == 'POST':
+        # Vérifier si la requête est distante
+        is_remote = not request.headers.get('Cookie')  # Pas de cookie = requête distante
+
+        if is_remote:
+            # Valider la clé API pour les requêtes distantes
+            key_error_response = validate_api_key(request)
+            if key_error_response:
+                return key_error_response  # Retourne une erreur si la clé est absente ou invalide
+
+        try:
+            if is_remote:
+                # Gestion des requêtes distantes
+                if request.content_type != 'application/json':
+                    return JsonResponse({"error": "Le format de la requête doit être JSON."}, status=400)
+
+                try:
+                    request_data = json.loads(request.body)  # Charger les données JSON
+                except json.JSONDecodeError:
+                    return JsonResponse({"error": "Données JSON invalides."}, status=400)
+
+                input_data = pd.DataFrame([request_data])  # Convertir en DataFrame
+                if input_data.shape[1] != 14:  # Vérifier si le nombre de colonnes est correct
+                    return JsonResponse({"error": "Le nombre de variables est incorrect."}, status=400)
+
+            else:
+                # Gestion des requêtes locales (utilisateurs inscrits)
+                client_id = request.POST.get('client_id')
+                if not client_id:
+                    return render(request, 'api_credit/predict.html', {"error_message": "Veuillez sélectionner un ID client."})
+
+                # Chargement des données client
+                customers = Customer.objects.all()
+                client_data = customers.filter(SK_ID_CURR=client_id).values()
+                if not client_data:
+                    return render(request, 'api_credit/predict.html', {"error_message": f"Aucune donnée trouvée pour l'ID client {client_id}."})
+
+                input_data = pd.DataFrame(client_data)  # Convertir en DataFrame
+
+            # Transformation log et suppression des colonnes inutiles
+            if 'AMT_INCOME_TOTAL' in input_data.columns:
+                input_data['AMT_INCOME_TOTAL_log'] = input_data['AMT_INCOME_TOTAL'].apply(lambda x: np.log1p(x) if x > 0 else 0)
+            if 'DAYS_EMPLOYED' in input_data.columns:
+                input_data['DAYS_EMPLOYED_log'] = input_data['DAYS_EMPLOYED'].apply(lambda x: np.log1p(abs(x)) if x < 0 else 0)
+            if 'CREDIT_INCOME_PERCENT' in input_data.columns:
+                input_data['CREDIT_INCOME_PERCENT_log'] = input_data['CREDIT_INCOME_PERCENT'].apply(lambda x: np.log1p(x) if x > 0 else 0)
+            if 'AMT_ANNUITY' in input_data.columns:
+                input_data['AMT_ANNUITY_log'] = input_data['AMT_ANNUITY'].apply(lambda x: np.log1p(x) if x > 0 else 0)
+
+            columns_to_remove = ['AMT_INCOME_TOTAL', 'DAYS_EMPLOYED', 'CREDIT_INCOME_PERCENT', 'AMT_ANNUITY']
+            input_data.drop(columns=[col for col in columns_to_remove if col in input_data.columns], inplace=True)
+
+            # Charger le modèle imposé (en l'occurrence LogisticRegression)
+            model = get_model("LogisticRegression", 9)
+
+            # récupérer le seuil logué dans MLflow
+            client = MlflowClient()
+            run_id = "b3673c2d8d994f8083a5344610faddcb"  
+            metrics = client.get_run(run_id).data.metrics
+            threshold = metrics.get("best_threshold", None)  # Récupération du seuil (par défaut None s'il est absent)
+            if threshold is not None:
+                threshold = round(threshold, 3)
+
+            # Réaliser les prédictions
+            X_features = input_data.drop(columns=['SK_ID_CURR'], errors='ignore')
+            predictions = model.predict(X_features)
+            # probability = float(model.predict_proba(X_features)[:, 1])
+            probability = round(float(model.predict_proba(X_features)[:, 1]), 3)
+
+
+            status = "Accepté" if predictions == 0 else "Refusé"
+            status_class = "text-success" if predictions == 0 else "text-danger"
+
+            # Résultats
+            context = {
+                "source": "Requête distante" if is_remote else "Utilisateur inscrit",
+                "SK_ID_CURR": "" if is_remote else client_id,
+                "probability": probability,
+                "predictions": predictions.tolist(),
+                "status": status,
+                "status_class": status_class,
+                "threshold": threshold 
+            }
+
+            if not is_remote:
+                # Charger l'explainer LIME depuis MLflow
+                lime_artifact_path = mlflow.artifacts.download_artifacts("mlflow-artifacts:/204207475808123679/b3673c2d8d994f8083a5344610faddcb/artifacts/explainers/lime_explainer_params.joblib")
+
+                # reconstruction d'explainer LIME à partir de paramètres sauvegardés
+                params = joblib.load(lime_artifact_path)  # Si c'est un dict
+                explainer = LimeTabularExplainer(
+                    training_data=params['training_data'],
+                    feature_names=params['feature_names'],
+                    mode=params['mode']
+)
+
+                # Récupérer les données du client correspondant à l'ID
+                selected_client_data = input_data[input_data['SK_ID_CURR'] == int(client_id)]
+
+                # Vérifier si des données existent pour cet ID
+                if selected_client_data.empty:
+                    return render(
+                        request,
+                        'api_credit/predict.html',
+                        {"error_message": f"Aucune donnée trouvée pour l'ID client {client_id}."}
+                    )
+
+                # Préparer les données du client pour LIME
+                X_features_array = selected_client_data.drop(columns=['SK_ID_CURR'], errors='ignore').to_numpy()
+
+                # Générer l'explication LIME pour ce client
+                lime_exp = explainer.explain_instance(
+                    X_features_array[0],  # Données du client sous forme de tableau
+                    model.predict_proba,
+                    num_features=10  # Nombre de caractéristiques à expliquer
+                )
+
+                # Créer un graphique LIME
+                static_images_path = os.path.join(settings.BASE_DIR, 'static', 'images')  # Répertoire cible
+                os.makedirs(static_images_path, exist_ok=True)  # Créez le dossier s'il n'existe pas
+                lime_graph_path = os.path.join(static_images_path, f'lime_graph_{client_id}.png')  # Nom unique basé sur l'ID client
+                lime_exp.as_pyplot_figure()
+                plt.title(f"Variables qui ont le plus contribué à la prédiction pour le client {client_id}")
+                plt.savefig(lime_graph_path, bbox_inches = 'tight')
+                plt.close()
+
+                # Ajouter le chemin statique au contexte
+                context["lime_graph"] = f'images/lime_graph_{client_id}.png'
+
+
+            # Retour des résultats pour les utilisateurs inscrits
+            return render(request, 'api_credit/predict.html', context)
+
+        except Exception as e:
+            if is_remote:
+                return JsonResponse({"error": f"Une erreur est survenue : {str(e)}"}, status=500)
+            else:
+                return render(request, 'api_credit/predict.html', {"error_message": f"Une erreur est survenue : {str(e)}"})
+
+    return JsonResponse({"error": "Seules les requêtes POST sont acceptées."}, status=405)
+
 
 
 # activation du compte après inscription, fait appel au fichier tokens.py
@@ -201,175 +404,3 @@ def delete_account(request):
         return redirect('home') 
     else:
         return render(request, 'api_credit/delete_account.html')
-
-
-# view qui permet de récupérer les performances d'un modèle depuis le répertoire 
-# mlruns/0
-def get_models_metrics():
-    models_metrics = {}
-    mlruns_path = "mlruns/0"  # Chemin vers le dossier mlruns/0
-
-    if not os.path.exists(mlruns_path):
-        return None
-
-    for model_run in os.listdir(mlruns_path):
-        run_path = os.path.join(mlruns_path, model_run)
-        metrics_path = os.path.join(run_path, "metrics")  # accéder au sous-dossier "metrics"
-        tags_path = os.path.join(run_path, "tags")  # accéder au sous-dossier "tags"
-        params_path = os.path.join(run_path, "params") # accéder au sous-dossier params
-        
-        if os.path.isdir(run_path) and os.path.exists(metrics_path) and os.path.exists(params_path):
-            # récupération des métriques
-            metrics = {}
-            for metric_file in os.listdir(metrics_path):
-                metric_path = os.path.join(metrics_path, metric_file)
-                with open(metric_path, "r") as f:
-                    content = f.read().strip()
-                    values = content.split()
-                    if len(values) > 1:
-                        metrics[metric_file] = float(values[1])  # Seule la deuxième valeur correspond à la métrique
-                    else:
-                        metrics[metric_file] = float(values[0])
-                        
-            # récupération du meilleur seuil
-            for params_file in os.listdir(params_path):
-                if params_file.startswith("optimized"):
-                    params_path = os.path.join(params_path, params_file)
-                    with open(params_path, "r") as f:
-                        content = float(f.read().strip())
-                        metrics[params_file] = content
-
-            # récupération du nom du modèle depuis "mlflow.runName"
-            model_name = f"Run {model_run}"  # Valeur par défaut
-            if os.path.exists(tags_path):
-                run_name_path = os.path.join(tags_path, "mlflow.runName")
-                if os.path.exists(run_name_path):
-                    with open(run_name_path, "r") as f:
-                        model_name = f.read().strip()
-                        
-
-            # ajout au dictionnaire final
-            models_metrics[model_name] = metrics
-
-    return models_metrics
-
-# view qui permet d'afficher la page models.html contenant les performances des modèles
-def models_view(request):
-    metrics = get_models_metrics()
-    return render(request, 'api_credit/models.html', 
-                {'models_metrics': metrics})
-
-
-# -------------------------- Fonction principale | Fonction testée dans test_functions.py  --------------------------
-
-# fonction qui effectue la prédiction pour un client choisi par l'utilisateur test_functions.py  --------------------------
-
-# Exemple de clé API (statique). Vous pouvez utiliser un système dynamique basé sur une base de données.
-VALID_API_KEYS = ['gkih8khkdl*!gg*rrl8944hh4!']
-
-def validate_api_key(request):
-    """
-    Fonction pour valider la clé API à partir des en-têtes de la requête.
-    """
-    api_key = request.headers.get('X-API-KEY')  # Récupérer la clé API des en-têtes
-    if not api_key or api_key not in VALID_API_KEYS:
-        return JsonResponse({"error": "Clé API invalide ou absente."}, status=403)
-
-    return None  # Retourne None si la clé est valide
-
-@csrf_exempt
-def predict(request):
-    if request.method == 'POST':
-        # Vérifier si la requête est distante
-        is_remote = not request.headers.get('Cookie')  # Pas de cookie = requête distante
-
-        if is_remote:
-            
-            # Valider la clé API pour les requêtes distantes
-            key_error_response = validate_api_key(request)
-            if key_error_response:
-                return key_error_response  # retourne une erreur si la clé est absente ou invalide
-
-        try:
-            if is_remote:
-                selected_model = 'LogisticRegression'
-                # gestion des requêtes distantes
-                if request.content_type != 'application/json':
-                    return JsonResponse({"error": "Le format de la requête doit être JSON."}, status=400)
-                
-                try:
-                    request_data = json.loads(request.body)  # Charger les données JSON
-                except json.JSONDecodeError:
-                    return JsonResponse({"error": "Données JSON invalides."}, status=400)
-
-                input_data = pd.DataFrame([request_data])  # Convertir en DataFrame
-                if input_data.shape[1] != 14:  # vérifier si le nombre de colonnes est correct
-                    return JsonResponse({"error": "Le nombre de variables est incorrect."}, status=400)
-
-            else:
-                # Gestion des requêtes locales (utilisateurs inscrits)
-                selected_model = request.POST.get('model')
-                client_id = request.POST.get('client_id')
-                
-                if not selected_model:
-                    return render(request, 'api_credit/predict.html', {"error_message": "Veuillez sélectionner un modèle."})
-                
-                if client_id:
-                    # chargement des données client
-                    customers = Customer.objects.all()
-                    client_data = customers.filter(SK_ID_CURR=client_id).values()
-                    if not client_data:
-                        return render(request, 'api_credit/predict.html', {"error_message": f"Aucune donnée trouvée pour l'ID client {client_id}."})
-                    
-                    input_data = pd.DataFrame(client_data)  # Convertir en DataFrame
-                    
-
-            # Transformation log et suppression des colonnes inutiles
-            if 'AMT_INCOME_TOTAL' in input_data.columns:
-                input_data['AMT_INCOME_TOTAL_log'] = input_data['AMT_INCOME_TOTAL'].apply(lambda x: np.log1p(x) if x > 0 else 0)
-            if 'DAYS_EMPLOYED' in input_data.columns:
-                input_data['DAYS_EMPLOYED_log'] = input_data['DAYS_EMPLOYED'].apply(lambda x: np.log1p(abs(x)) if x < 0 else 0)
-            if 'CREDIT_INCOME_PERCENT' in input_data.columns:
-                input_data['CREDIT_INCOME_PERCENT_log'] = input_data['CREDIT_INCOME_PERCENT'].apply(lambda x: np.log1p(x) if x > 0 else 0)
-            if 'AMT_ANNUITY' in input_data.columns:
-                input_data['AMT_ANNUITY_log'] = input_data['AMT_ANNUITY'].apply(lambda x: np.log1p(x) if x > 0 else 0)
-
-            columns_to_remove = ['AMT_INCOME_TOTAL', 'DAYS_EMPLOYED', 'CREDIT_INCOME_PERCENT', 'AMT_ANNUITY']
-            input_data.drop(columns=[col for col in columns_to_remove if col in input_data.columns], inplace=True)
-
-            # Charger le modèle
-            model_path = os.path.join(settings.BASE_DIR, 'best_models', f"{selected_model}.joblib")
-            model = load(model_path)
-
-            # Réaliser les prédictions
-            X_features = input_data.drop(columns=['SK_ID_CURR'], errors='ignore')
-            predictions = model.predict(X_features)
-            probability = float(model.predict_proba(X_features)[:, 1])
-            
-            status = "Accepté" if predictions == 0 else "Refusé"
-            status_class = "text-success" if predictions == 0 else "text-danger"
-
-            # Résultats
-            context = {
-                "source": "Requête distante" if is_remote else "Utilisateur inscrit",
-                "SK_ID_CURR": "" if is_remote else client_id,
-                "probability": probability,
-                "predictions": predictions.tolist(),
-                "status": status,
-                "status_class": status_class,
-            }
-
-            # Retour des résultats
-            if is_remote:
-                return JsonResponse(context, status=200)
-            else:
-                return render(request, 'api_credit/predict.html', context)
-
-        except Exception as e:
-            if is_remote:
-                return JsonResponse({"error": f"Une erreur est survenue : {str(e)}"}, status=500)
-            else:
-                return render(request, 'api_credit/predict.html', {"error_message": f"Une erreur est survenue : {str(e)}"})
-
-    return JsonResponse({"error": "Seules les requêtes POST sont acceptées."}, status=405)
-

@@ -88,24 +88,24 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'railway',
-#         'USER': 'postgres',
-#         'PASSWORD': os.environ['DB_PASSWORD_RAILWAY'],
-#         'HOST': os.environ.get('RAILWAY_HOST'),
-#         'PORT': os.environ.get('RAILWAY_PORT'),
-        
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': os.environ['DB_PASSWORD_RAILWAY'],
+        'HOST': os.environ.get('RAILWAY_HOST'),
+        'PORT': os.environ.get('RAILWAY_PORT'),
+        
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -176,4 +176,4 @@ AUTH_USER_MODEL = 'api_credit.CustomUser'
 
 
 # Configuration de l'URI MLflow
-MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
+MLFLOW_TRACKING_URI = os.environ.get('MLFLOW_TRACKING_URI')

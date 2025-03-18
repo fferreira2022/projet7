@@ -11,7 +11,6 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('api/', views.api, name='api'),
     path('predict/', views.predict, name='predict'),
-    path('models/', views.models_view, name='models'),
     path('profile/<str:pk>/', views.userProfile, name='user-profile'),
     path('update_profile/', views.updateProfile, name='update-profile'),
     
