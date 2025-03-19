@@ -313,7 +313,7 @@ def predict(request):
                 # charger le lime explainer sauvegardé en local
                 lime_explainer_path = os.path.join(
                     os.path.dirname(os.path.abspath(__file__)),
-                    "../mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/explainers/lime_explainer_params.joblib"
+                    "../mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/artifacts/explainers/lime_explainer_params.joblib"
                 )
                 try:
                     params = joblib.load(lime_explainer_path)
