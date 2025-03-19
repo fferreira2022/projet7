@@ -109,7 +109,7 @@ def api(request):
 
 # fonction qui effectue la prédiction pour un client choisi par l'utilisateur test_functions.py  --------------------------
 
-# Exemple de clé API (statique). Vous pouvez utiliser un système dynamique basé sur une base de données.
+# clé API (statique)
 VALID_API_KEY = os.environ.get('VALID_API_KEY')
 
 def validate_api_key(request):
@@ -123,18 +123,50 @@ def validate_api_key(request):
     return None  # retourne None si la clé est valide ou une erreur sinon
 
 
-# récupérer le modèle directement depuis mlflow ui
-def get_model(name, version):
+# # récupérer le modèle directement depuis mlflow ui
+# def get_model(name, version):
+#     """
+#     Fonction pour charger un modèle MLflow scikit-learn par son nom et sa version.
+#     """
+#     try:
+#         model = load_model(f"models:/{name}/{version}")
+#         return model
+#     except Exception as e:
+#         raise ValueError(f"Erreur lors du chargement du modèle {name} version {version} : {str(e)}")
+
+
+def get_model():
     """
-    Fonction pour charger un modèle MLflow scikit-learn par son nom et sa version.
+    Fonction pour charger un modèle scikit-learn depuis un fichier local avec un chemin prédéfini.
     """
+    filepath = "mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/mlflow_model/model.pkl"
     try:
-        model = load_model(f"models:/{name}/{version}")
+        # Charger le modèle à partir du fichier spécifié
+        model = joblib.load(filepath)
         return model
     except Exception as e:
-        raise ValueError(f"Erreur lors du chargement du modèle {name} version {version} : {str(e)}")
+        raise ValueError(f"Erreur lors du chargement du modèle à partir de {filepath} : {str(e)}")
 
 
+# fonction pour récupérer le seuil optimisé du modèle
+def get_threshold():
+    """
+    Fonction pour récupérer le threshold (meilleur seuil) sauvegardé localement.
+    """
+    filepath = "mlruns/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/metrics/best_threshold"
+    try:
+        # lire le fichier contenant le seuil
+        with open(filepath, 'r') as file:
+            value = file.read().strip()  # lire et retirer les espaces inutiles (si présents)
+            threshold = round(float(value), 3)  # arrondir à 3 décimales
+            return threshold
+    except FileNotFoundError:
+        raise ValueError(f"Fichier introuvable au chemin : {filepath}")
+    except Exception as e:
+        raise ValueError(f"Erreur lors de la récupération du seuil : {str(e)}")
+
+
+# fonction predict (fonction principale de l'appllication)
 @csrf_exempt
 def predict(request):
     if request.method == 'POST':
@@ -200,10 +232,8 @@ def predict(request):
             #------------------ Processus commun aux requêtes distantes et locales (via l'application) -------------------
             
             # charger le modèle imposé (en l'occurrence LogisticRegression)
-            model = get_model("LogisticRegression", 10)
-            
-            print(f"Modèle chargé: {model}")
-            print(f"Requête distante: {is_remote}")
+            # model = get_model("LogisticRegression", 10)
+            model = get_model()
             
             if model is None and is_remote:
                 return JsonResponse({"error": "Le modèle est introuvable."}, status=500)
@@ -212,13 +242,18 @@ def predict(request):
                                 {"error_message": "Erreur lors du chargement du modèle."})
                 
 
-            # récupérer le seuil logué dans MLflow
-            client = MlflowClient()
-            run_id = "6a092d75528f46c0bf4fbf1cb5f93daf"  
-            metrics = client.get_run(run_id).data.metrics
-            threshold = metrics.get("best_threshold", None)  # Récupération du seuil (par défaut None s'il est absent)
-            if threshold is not None:
-                threshold = round(threshold, 3)
+            # # récupérer le seuil logué dans MLflow
+            # client = MlflowClient()
+            # run_id = "6a092d75528f46c0bf4fbf1cb5f93daf"  
+            # metrics = client.get_run(run_id).data.metrics
+            # threshold = metrics.get("best_threshold", None)  # Récupération du seuil (par défaut None s'il est absent)
+            
+            # récupérer le seuil sauvegardé en local
+            try:
+                threshold = get_threshold()
+                print(f"Seuil récupéré : {threshold}")
+            except ValueError as e:
+                return JsonResponse({"error": f"Impossible de récupérer le seuil : {str(e)}"}, status=500)
 
             # Réaliser les prédictions
             X_features = input_data.drop(columns=['SK_ID_CURR'], errors='ignore')
@@ -260,10 +295,12 @@ def predict(request):
 
             if not is_remote:
                 # Charger l'explainer LIME depuis MLflow
-                lime_artifact_path = mlflow.artifacts.download_artifacts("mlflow-artifacts:/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/artifacts/explainers/lime_explainer_params.joblib")
-
+                # lime_artifact_path = mlflow.artifacts.download_artifacts("mlflow-artifacts:/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/artifacts/explainers/lime_explainer_params.joblib")
+                
+                # charger le lime explainer sauvegardé en local
+                lime_explainer_path = "mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/explainers/lime_explainer_params.joblib"
                 # Reconstruction d'explainer LIME à partir de paramètres sauvegardés
-                params = joblib.load(lime_artifact_path)  # Si c'est un dict
+                params = joblib.load(lime_explainer_path)  # Si c'est un dict
                 explainer = LimeTabularExplainer(
                     training_data=params['training_data'],
                     feature_names=params['feature_names'],
