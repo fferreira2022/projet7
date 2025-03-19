@@ -28,10 +28,10 @@ load_dotenv()
 # SECRET_KEY = 'django-insecure-d$f3!0^f4$2z$ej(gdm90gymzwapmf-@_e_u#3&g+q--rz9q0p'
 
 # # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG')
 
 # ALLOWED_HOSTS = ['projet7-production.up.railway.app', 'https://projet7-production.up.railway.app']
 # CSRF_TRUSTED_ORIGINS = ['https://projet7-production.up.railway.app']
@@ -91,11 +91,11 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': os.environ['DB_PASSWORD_RAILWAY'],
-        'HOST': os.environ.get('RAILWAY_HOST'),
-        'PORT': os.environ.get('RAILWAY_PORT'),
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ['DB_PASSWORD'],
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
         
     }
 }
@@ -168,7 +168,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Django session timeout
 # étape 4 pour installer django auto logout
-AUTO_LOGOUT = {'IDLE_TIME': 600, 'REDIRECT_TO_LOGIN_IMMEDIATELY': True,
+AUTO_LOGOUT = {'IDLE_TIME': 6000, 'REDIRECT_TO_LOGIN_IMMEDIATELY': True,
                'MESSAGE': 'Votre session a expiré. Veuillez vous reconnecter.',
                } 
 
