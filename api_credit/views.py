@@ -139,9 +139,12 @@ def get_model():
     """
     Fonction pour charger un modèle scikit-learn depuis un fichier local avec un chemin prédéfini.
     """
-    filepath = "../mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/artifacts/mlflow_model/model.pkl"
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    filepath = os.path.join(base_path, "../mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/artifacts/mlflow_model/model.pkl")
+
     try:
         # Charger le modèle à partir du fichier spécifié
+        
         model = joblib.load(filepath)
         return model
     except Exception as e:
@@ -153,7 +156,8 @@ def get_threshold():
     """
     Fonction pour récupérer le threshold (meilleur seuil) sauvegardé localement.
     """
-    filepath = "../mlruns/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/metrics/best_threshold"
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    filepath = os.path.join(base_path, "../mlruns/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/metrics/best_threshold")
     try:
         # lire le fichier contenant le seuil
         with open(filepath, 'r') as file:
