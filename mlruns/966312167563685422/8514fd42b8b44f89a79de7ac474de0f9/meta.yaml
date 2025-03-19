@@ -1,0 +1,15 @@
+artifact_uri: file:C:/Users/frede/OneDrive/Bureau/Projet7/artifacts_of_exp_250316/8514fd42b8b44f89a79de7ac474de0f9/artifacts
+end_time: 1742135341292
+entry_point_name: ''
+experiment_id: '966312167563685422'
+lifecycle_stage: active
+run_id: 8514fd42b8b44f89a79de7ac474de0f9
+run_name: RandomForestClassifier
+run_uuid: 8514fd42b8b44f89a79de7ac474de0f9
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1742134995690
+status: 3
+tags: []
+user_id: frede
