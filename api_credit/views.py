@@ -139,7 +139,7 @@ def get_model():
     """
     Fonction pour charger un modèle scikit-learn depuis un fichier local avec un chemin prédéfini.
     """
-    filepath = "../mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/mlflow_model/model.pkl"
+    filepath = "../mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/artifacts/mlflow_model/model.pkl"
     try:
         # Charger le modèle à partir du fichier spécifié
         model = joblib.load(filepath)
