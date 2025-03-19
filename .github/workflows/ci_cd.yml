@@ -29,6 +29,11 @@ jobs:
       - name: Apply migrations
         env:
           DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD_RAILWAY: ${{ secrets.DB_PASSWORD_RAILWAY }}
+          RAILWAY_HOST: ${{ secrets.RAILWAY_HOST }}
+          RAILWAY_PORT: ${{ secrets.RAILWAY_PORT }}
         run: |
           python manage.py migrate
 
