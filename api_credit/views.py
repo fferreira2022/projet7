@@ -311,14 +311,21 @@ def predict(request):
                 # lime_artifact_path = mlflow.artifacts.download_artifacts("mlflow-artifacts:/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/artifacts/explainers/lime_explainer_params.joblib")
                 
                 # charger le lime explainer sauvegardé en local
-                lime_explainer_path = "mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/explainers/lime_explainer_params.joblib"
-                # Reconstruction d'explainer LIME à partir de paramètres sauvegardés
-                params = joblib.load(lime_explainer_path)  # Si c'est un dict
-                explainer = LimeTabularExplainer(
-                    training_data=params['training_data'],
-                    feature_names=params['feature_names'],
-                    mode=params['mode']
-)
+                lime_explainer_path = os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    "../mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/explainers/lime_explainer_params.joblib"
+                )
+                try:
+                    params = joblib.load(lime_explainer_path)
+                    explainer = LimeTabularExplainer(
+                        training_data=params['training_data'],
+                        feature_names=params['feature_names'],
+                        mode=params['mode']
+                    )
+                except FileNotFoundError:
+                    raise ValueError(f"Fichier introuvable au chemin : {lime_explainer_path}")
+                except Exception as e:
+                    raise ValueError(f"Erreur lors du chargement du Lime Explainer : {str(e)}")
 
                 # Récupérer les données du client correspondant à l'id client
                 selected_client_data = input_data[input_data['SK_ID_CURR'] == int(client_id)]
