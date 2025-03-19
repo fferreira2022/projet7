@@ -15,8 +15,12 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
+        
+    # Lecture de la variable d'environnement PORT pour Railway
+    port = int(os.environ.get('PORT', 8000))  # 8000 par défaut en local
+    if len(sys.argv) == 1 or sys.argv[1] == 'runserver':
+        sys.argv.append(f"0.0.0.0:{port}")
     execute_from_command_line(sys.argv)
-
 
 if __name__ == '__main__':
     main()
