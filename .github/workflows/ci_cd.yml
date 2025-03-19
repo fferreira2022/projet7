@@ -58,6 +58,7 @@ jobs:
       - name: Run Pytest
         env:
           DJANGO_SETTINGS_MODULE: project.settings
+          ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
           VALID_API_KEY: ${{ secrets.VALID_API_KEY }}
@@ -77,7 +78,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -91,6 +92,7 @@ jobs:
       - name: Migrate Database
         env:
           DJANGO_SETTINGS_MODULE: project.settings
+          ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
           VALID_API_KEY: ${{ secrets.VALID_API_KEY }}
@@ -106,6 +108,7 @@ jobs:
       - name: Deploy to Railway
         env:
           DJANGO_SETTINGS_MODULE: project.settings
+          ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
           DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
           VALID_API_KEY: ${{ secrets.VALID_API_KEY }}
