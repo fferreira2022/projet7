@@ -202,8 +202,8 @@ def predict(request):
             # charger le modèle imposé (en l'occurrence LogisticRegression)
             model = get_model("LogisticRegression", 10)
             
-            print(f"Modèle chargé : {model}")
-            print(f"Requête distante : {is_remote}")
+            print(f"Modèle chargé: {model}")
+            print(f"Requête distante: {is_remote}")
             
             if model is None and is_remote:
                 return JsonResponse({"error": "Le modèle est introuvable."}, status=500)

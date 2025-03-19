@@ -15,14 +15,14 @@
                             <p>{{user.username}}</p>
                             <label><b>E-mail:</b></label>
                             <p>{{user.email}}</p>
-                            <a class="btn btn-outline-success btn-sm" href="{% url 'update-profile' %}">Modifier</a>
+                            <a class="btn btn-outline-warning btn-sm" href="{% url 'update-profile' %}">Modifier</a>
                         </div>
                         <hr>
                         <div>
                             <label><b>Mot de passe:</b></label>
                             {% comment %} <p>{{user.password}}</p> {% endcomment %}
                             <p>********</p>
-                            <a class="btn btn-outline-success btn-sm" href="{% url 'reset_password' %}">Modifier</a>
+                            <a class="btn btn-outline-warning btn-sm" href="{% url 'reset_password' %}">Modifier</a>
                         </div>
                     </div>
                 </div>
@@ -67,14 +67,14 @@
                         <p>{{user.username}}</p>
                         <label><b>E-mail:</b></label>
                         <p>{{user.email}}</p>
-                        <a class="btn btn-outline-success btn-sm" href="{% url 'update-profile' %}">Modify</a>
+                        <a class="btn btn-outline-warning btn-sm" href="{% url 'update-profile' %}">Modify</a>
                     </div>
                     <hr>
                     <div>
                         <label><b>Password:</b></label>
                         {% comment %} <p>{{user.password}}</p> {% endcomment %}
                         {% comment %} <p>********</p>
-                        <a class="btn btn-outline-success btn-sm" href="{% url 'reset_password' %}">Modify</a>
+                        <a class="btn btn-outline-warning btn-sm" href="{% url 'reset_password' %}">Modify</a>
                     </div>
                 </div>
             </div>
