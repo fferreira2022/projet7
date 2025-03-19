@@ -262,7 +262,7 @@ def predict(request):
                 # Charger l'explainer LIME depuis MLflow
                 lime_artifact_path = mlflow.artifacts.download_artifacts("mlflow-artifacts:/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/artifacts/explainers/lime_explainer_params.joblib")
 
-                # reconstruction d'explainer LIME à partir de paramètres sauvegardés
+                # Reconstruction d'explainer LIME à partir de paramètres sauvegardés
                 params = joblib.load(lime_artifact_path)  # Si c'est un dict
                 explainer = LimeTabularExplainer(
                     training_data=params['training_data'],
