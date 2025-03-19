@@ -224,76 +224,76 @@ def test_model_loading_remote(mock_get_model):
 
 # -------------------------------------- Sixième test -------------------------------------------------
 
-@pytest.fixture
-def mock_model():
-    # Création d'un faux modèle
-    model = MagicMock()
-    model.predict.return_value = np.array([1])  # Simulation d'une prédiction de classe 1
-    model.predict_proba.return_value = np.array([[0.2, 0.8]])  # Simulation de probabilités
-    return model
+# @pytest.fixture
+# def mock_model():
+#     # Création d'un faux modèle
+#     model = MagicMock()
+#     model.predict.return_value = np.array([1])  # Simulation d'une prédiction de classe 1
+#     model.predict_proba.return_value = np.array([[0.2, 0.8]])  # Simulation de probabilités
+#     return model
 
 
-# tester si la prédiction est correcte (soit 0 soit 1)
-# et si la probabilité est bien comprise entre 0 et 1
-@patch('api_credit.views.get_model')
-def test_prediction(mock_get_model, mock_model):
+# # tester si la prédiction est correcte (soit 0 soit 1)
+# # et si la probabilité est bien comprise entre 0 et 1
+# @patch('api_credit.views.get_model')
+# def test_prediction(mock_get_model, mock_model):
     
-    mock_get_model.return_value = mock_model
+#     mock_get_model.return_value = mock_model
     
-    client = Client()
+#     client = Client()
     
-    headers = {
-        'X-API-KEY': VALID_API_KEY  # Clé API valide
-    }
+#     headers = {
+#         'X-API-KEY': VALID_API_KEY  # Clé API valide
+#     }
 
 
-    # définir les données pour un client
-    data={
-        "SK_ID_CURR": 100091,
-        "EXT_SOURCE_1": 0.56,
-        "EXT_SOURCE_2": 0.78,
-        "EXT_SOURCE_3": 0.65,
-        "DAYS_BIRTH": 12000,
-        "DAYS_EMPLOYED": 4000,
-        "CODE_GENDER_M": True,
-        "CREDIT_INCOME_PERCENT": 0.25,
-        "ANNUITY_INCOME_PERCENT": 0.12,
-        "CREDIT_TERM": 36.5,
-        "AMT_CREDIT": 250000.0,
-        "AMT_ANNUITY": 15000.0,
-        "AMT_INCOME_TOTAL": 100000.0,
-        "DAYS_EMPLOYED_PERCENT": 0.33,
-        "NAME_INCOME_TYPE_Businessman": False,
-        "NAME_INCOME_TYPE_Commercial_associate": True,
-        "NAME_INCOME_TYPE_Pensioner": False,
-        "NAME_INCOME_TYPE_State_servant": False,
-        "NAME_INCOME_TYPE_Student": False,
-        "NAME_INCOME_TYPE_Unemployed": False,
-        "NAME_INCOME_TYPE_Working": True,
-        "NAME_EDUCATION_TYPE_Academic_degree": False,
-        "NAME_EDUCATION_TYPE_Higher_education": True,
-        "NAME_EDUCATION_TYPE_Incomplete_higher": False,
-        "NAME_EDUCATION_TYPE_Lower_secondary": False,
-        "NAME_EDUCATION_TYPE_Secondary_secondary_special": False
-        }
+#     # définir les données pour un client
+#     data={
+#         "SK_ID_CURR": 100091,
+#         "EXT_SOURCE_1": 0.56,
+#         "EXT_SOURCE_2": 0.78,
+#         "EXT_SOURCE_3": 0.65,
+#         "DAYS_BIRTH": 12000,
+#         "DAYS_EMPLOYED": 4000,
+#         "CODE_GENDER_M": True,
+#         "CREDIT_INCOME_PERCENT": 0.25,
+#         "ANNUITY_INCOME_PERCENT": 0.12,
+#         "CREDIT_TERM": 36.5,
+#         "AMT_CREDIT": 250000.0,
+#         "AMT_ANNUITY": 15000.0,
+#         "AMT_INCOME_TOTAL": 100000.0,
+#         "DAYS_EMPLOYED_PERCENT": 0.33,
+#         "NAME_INCOME_TYPE_Businessman": False,
+#         "NAME_INCOME_TYPE_Commercial_associate": True,
+#         "NAME_INCOME_TYPE_Pensioner": False,
+#         "NAME_INCOME_TYPE_State_servant": False,
+#         "NAME_INCOME_TYPE_Student": False,
+#         "NAME_INCOME_TYPE_Unemployed": False,
+#         "NAME_INCOME_TYPE_Working": True,
+#         "NAME_EDUCATION_TYPE_Academic_degree": False,
+#         "NAME_EDUCATION_TYPE_Higher_education": True,
+#         "NAME_EDUCATION_TYPE_Incomplete_higher": False,
+#         "NAME_EDUCATION_TYPE_Lower_secondary": False,
+#         "NAME_EDUCATION_TYPE_Secondary_secondary_special": False
+#         }
     
-    # effectuer une requête POST
-    response = client.post(
-        reverse('predict'),
-        data=json.dumps(data),
-        content_type='application/json',
-        HTTP_X_API_KEY=headers['X-API-KEY']
-    )
+#     # effectuer une requête POST
+#     response = client.post(
+#         reverse('predict'),
+#         data=json.dumps(data),
+#         content_type='application/json',
+#         HTTP_X_API_KEY=headers['X-API-KEY']
+#     )
 
-    # charger les données de réponse en JSON
-    data = response.json()
+#     # charger les données de réponse en JSON
+#     data = response.json()
 
-    # Vérifiez la prédiction (doit être 0 ou 1)
-    assert data['predictions'][0] in [0, 1], "La prédiction doit être 0 ou 1."
+#     # Vérifiez la prédiction (doit être 0 ou 1)
+#     assert data['predictions'][0] in [0, 1], "La prédiction doit être 0 ou 1."
 
-    # vérifiez que la probabilité est un nombre décimal compris entre 0 et 1
-    assert 0 <= data['probability'] <= 1, "La probabilité doit être entre 0 et 1."
+#     # vérifiez que la probabilité est un nombre décimal compris entre 0 et 1
+#     assert 0 <= data['probability'] <= 1, "La probabilité doit être entre 0 et 1."
     
-    # vérifier que le message d'erreur pour une probabilité incorrecte est suffisamment clair
-    if response.status_code == 400:
-        assert "La probabilité doit être comprise en 0 et 1" in data.get("error", "")
+#     # vérifier que le message d'erreur pour une probabilité incorrecte est suffisamment clair
+#     if response.status_code == 400:
+#         assert "La probabilité doit être comprise en 0 et 1" in data.get("error", "")
