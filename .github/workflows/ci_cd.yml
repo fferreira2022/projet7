@@ -58,6 +58,7 @@ jobs:
       - name: Run Pytest
         env:
           DJANGO_SETTINGS_MODULE: project.settings
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USER: ${{ secrets.DB_USER }}
