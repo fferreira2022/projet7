@@ -134,7 +134,7 @@ def validate_api_key(request):
 #     except Exception as e:
 #         raise ValueError(f"Erreur lors du chargement du modèle {name} version {version} : {str(e)}")
 
-
+# # récupérer le modèle
 def get_model():
     """
     Fonction pour charger un modèle scikit-learn depuis un fichier local avec un chemin prédéfini.
@@ -154,20 +154,29 @@ def get_model():
 # fonction pour récupérer le seuil optimisé du modèle
 def get_threshold():
     """
-    Fonction pour récupérer le threshold (meilleur seuil) sauvegardé localement.
+    Fonction pour récupérer le seuil (meilleur threshold) sauvegardé localement.
     """
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    filepath = os.path.join(base_path, "../mlruns/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/metrics/best_threshold")
+    filepath = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "../mlruns/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/metrics/best_threshold"
+    )
     try:
-        # lire le fichier contenant le seuil
+        # Lire le contenu du fichier
         with open(filepath, 'r') as file:
-            value = file.read().strip()  # lire et retirer les espaces inutiles (si présents)
-            threshold = round(float(value), 3)  # arrondir à 3 décimales
-            return threshold
+            data = file.read().strip()  # Supprimer les espaces ou sauts de ligne
+
+        # Extraire la seconde valeur (le seuil) en divisant par les espaces
+        threshold_value = data.split()[1]  # Récupère le deuxième élément (index 1)
+
+        # Convertir en float et arrondir
+        threshold = round(float(threshold_value), 3)
+        return threshold
     except FileNotFoundError:
         raise ValueError(f"Fichier introuvable au chemin : {filepath}")
-    except Exception as e:
+    except ValueError as e:
         raise ValueError(f"Erreur lors de la récupération du seuil : {str(e)}")
+    except Exception as e:
+        raise ValueError(f"Une erreur imprévue est survenue : {str(e)}")
 
 
 # fonction predict (fonction principale de l'appllication)

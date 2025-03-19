@@ -7,10 +7,10 @@
             <ul class="navbar-nav w-100 d-flex justify-content-between">
                 {% if request.user.is_authenticated and request.user.is_superuser %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}"><h5 class="text-warning">Prêt à dépenser</h5></a>
+                        <a class="nav-link" href="{% url 'home' %}"><h5 class="text-success">Prêt à dépenser</h5></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'api' %}"><h5 class="text-warning">Estimation du risque</h5></a>
+                        <a class="nav-link" href="{% url 'api' %}"><h5 class="text-success">Estimation du risque</h5></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'user-profile' user.id %}">Mon compte</a>
@@ -28,10 +28,10 @@
                     </li>
                 {% elif request.user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}"><h5 class="text-warning">Prêt à dépenser</h5></a>
+                        <a class="nav-link" href="{% url 'home' %}"><h5 class="text-success">Prêt à dépenser</h5></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'api' %}"><h5 class="text-warning">Estimation du risque</h5></a>
+                        <a class="nav-link" href="{% url 'api' %}"><h5 class="text-success">Estimation du risque</h5></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'user-profile' user.id %}">Mon compte</a>
@@ -46,10 +46,10 @@
                     </li>
                 {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}"><h5 class="text-warning">Prêt à dépenser</h5></a>
+                        <a class="nav-link" href="{% url 'home' %}"><h5 class="text-success">Prêt à dépenser</h5></a>
                     </li> 
                     {% comment %} <li class="nav-item">
-                        <a class="nav-link" href="{% url 'register' %}"><h5 class="text-warning">S'inscrire</h5></a>
+                        <a class="nav-link" href="{% url 'register' %}"><h5 class="text-success">S'inscrire</h5></a>
                     </li> {% endcomment %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'login' %}">
