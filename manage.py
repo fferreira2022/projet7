@@ -17,7 +17,7 @@ def main():
         ) from exc
         
     # Lecture de la variable d'environnement PORT pour Railway
-    port = int(os.environ.get('PORT', 8000))  # 8000 par défaut en local
+    port = int(os.environ.get('PORT', 8080))  # 8000 par défaut en local
     if len(sys.argv) == 1 or sys.argv[1] == 'runserver':
         sys.argv.append(f"0.0.0.0:{port}")
     execute_from_command_line(sys.argv)
