@@ -135,35 +135,44 @@ def validate_api_key(request):
 #         raise ValueError(f"Erreur lors du chargement du modèle {name} version {version} : {str(e)}")
 
 
+# fonction qui récupère le modèle sauvegardé en local
 def get_model():
     """
-    Fonction pour charger un modèle scikit-learn depuis un fichier local avec un chemin prédéfini.
+    Fonction pour charger un modèle scikit-learn depuis un fichier local avec un chemin relatif.
     """
-    filepath = "mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/mlflow_model/model.pkl"
+    base_path = os.path.dirname(os.path.abspath(__file__))  # répertoire de api_credit
+    filepath = os.path.join(base_path, "../mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/mlflow_model/model.pkl")
+    
     try:
         # Charger le modèle à partir du fichier spécifié
         model = joblib.load(filepath)
         return model
+    except FileNotFoundError:
+        raise ValueError(f"Fichier introuvable au chemin : {filepath}")
     except Exception as e:
-        raise ValueError(f"Erreur lors du chargement du modèle à partir de {filepath} : {str(e)}")
+        raise ValueError(f"Erreur lors du chargement du modèle : {str(e)}")
+
 
 
 # fonction pour récupérer le seuil optimisé du modèle
 def get_threshold():
     """
-    Fonction pour récupérer le threshold (meilleur seuil) sauvegardé localement.
+    Fonction pour récupérer le seuil sauvegardé localement.
     """
-    filepath = "mlruns/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/metrics/best_threshold"
+    base_path = os.path.dirname(os.path.abspath(__file__))  # répertoire de api_credit
+    filepath = os.path.join(base_path, "../mlruns/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/metrics/best_threshold")
+    
     try:
-        # lire le fichier contenant le seuil
+        # Lire le fichier contenant le seuil
         with open(filepath, 'r') as file:
-            value = file.read().strip()  # lire et retirer les espaces inutiles (si présents)
+            value = file.read().strip()  # lire le fichier et retirer les espaces inutiles
             threshold = round(float(value), 3)  # arrondir à 3 décimales
             return threshold
     except FileNotFoundError:
         raise ValueError(f"Fichier introuvable au chemin : {filepath}")
     except Exception as e:
         raise ValueError(f"Erreur lors de la récupération du seuil : {str(e)}")
+
 
 
 # fonction predict (fonction principale de l'appllication)
