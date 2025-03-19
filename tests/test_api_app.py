@@ -216,6 +216,6 @@ def test_model_loading_remote(mock_get_model):
     # Vérifier le statut de la réponse, doit afficher un code 500 si problème de chargement du modèle
     assert response.status_code == 500
     
-    # assertion selon laquelle le message d'erreur indique bien que le modèle est introuvable
+    # Assertion selon laquelle le message d'erreur indique bien que le modèle est introuvable
     assert response.json().get("error") == "Le modèle est introuvable."
     
