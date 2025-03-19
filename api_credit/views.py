@@ -270,7 +270,7 @@ def predict(request):
                     mode=params['mode']
 )
 
-                # Récupérer les données du client correspondant à l'ID
+                # Récupérer les données du client correspondant à l'id client
                 selected_client_data = input_data[input_data['SK_ID_CURR'] == int(client_id)]
 
                 # Vérifier si des données existent pour cet ID
