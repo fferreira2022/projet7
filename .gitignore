@@ -5,9 +5,7 @@ secret_key.txt/
 notes.txt/
 secret_key.txt/
 .env/
-mlruns/
 best_models/
-mlartifacts/
 artifacts_of_exp_250316/
 clients_test.cav/
 clients_train.csv/
