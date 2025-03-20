@@ -105,13 +105,12 @@ def api(request):
 
 
 
-# -------------------------- Fonction principale | Fonction testée dans test_functions.py  --------------------------
-
-# fonction qui effectue la prédiction pour un client choisi par l'utilisateur test_functions.py  --------------------------
+# -------------------------- Fonction principale te ses subordonnées | Fonction testée dans test_functions.py  --------------------------
 
 # clé API (statique)
 VALID_API_KEY = os.environ.get('VALID_API_KEY')
 
+# vérifier si la clé API est valide
 def validate_api_key(request):
     """
     Fonction pour valider la clé API à partir des en-têtes de la requête.
@@ -179,7 +178,7 @@ def get_threshold():
         raise ValueError(f"Une erreur imprévue est survenue : {str(e)}")
 
 
-# fonction predict (fonction principale de l'appllication)
+# fonction predict (fonction principale de l'application) qui effectue la prédiction pour un client choisi par l'utilisateur 
 @csrf_exempt
 def predict(request):
     if request.method == 'POST':
