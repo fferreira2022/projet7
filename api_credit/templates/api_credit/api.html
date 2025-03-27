@@ -9,7 +9,7 @@
             <br><br>
             <div class="container w-100" id="picture_main_div">
                 <div class="form-group mt-3">
-                    <h3 for="customer_dropdown">Choisir un client</h3>
+                    <h4 for="customer_dropdown">Choisir un client</h4>
                     <select id="customer_dropdown" name="customer" class="form-control" onchange="showCustomerDetails()">
                         {% for customer in all_customers %}
                             <option value="{{ customer.SK_ID_CURR }}"
@@ -25,11 +25,11 @@
                     
                     <!-- détails client -->
                     <ul id="customer_details" style="margin-top: 15px; list-style-type: disc; padding-left: 20px;">
-                        <li><h5>Âge : <span id="detail_birth"></span> (en jours au moment du prêt)</5></li>
-                        <li><h5>Sexe : <span id="detail_gender"></span></5></li>
-                        <li><h5>Employé depuis : <span id="detail_employed"></span> jours</5></li>
-                        <li><h5>Montant du crédit : <span id="detail_credit"></span> €</5></li>
-                        <li><h5>Revenus annuels: <span id="detail_income"></span> €</5></li>
+                        <li><h6 class='text-warning'>Âge : </6><span id="detail_birth"></span> (en jours au moment du prêt)</li>
+                        <li><h6 class='text-warning'>Sexe : </6><span id="detail_gender"></span></li>
+                        <li><h6 class='text-warning'>Employé depuis : </6><span id="detail_employed"></span> jours</li>
+                        <li><h6 class='text-warning'>Montant du crédit : </6><span id="detail_credit"></span> €</li>
+                        <li><h6 class='text-warning'>Revenus annuels: </6><span id="detail_income"></span> €</li>
                     </ul>
                 </div>
             </div>
@@ -37,7 +37,7 @@
         <div class='col-md-6 col-sm-12 mb-3'>
             <br><br>
             <div class="container text-center mt-4">
-                <h3>Choisir un modèle</h3>
+                <h4>Choisir un modèle</h4>
                 <form method="POST" action="{% url 'predict' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <!-- sélection du modèle -->
