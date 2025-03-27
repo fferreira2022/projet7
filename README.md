@@ -12,8 +12,6 @@ The mlruns folder and its 3 subdirectories contains information about the traine
 
 The requirements.txt file contains all packages / dependencies used in the virtual environment.
 
-The Ferreira_Frederic_2_notebook_modelisation is a notebook where the exploratory data analysis, feature engineering and training of models were performed.
-
 The Ferreira_Frederic_5_test_API_032025.py file was created to test the API by sending remote HTTP requests using a Streamlit UI
 
 Finally, the tests folder contains the test_functions.py file where some tests were performed using pytest.
