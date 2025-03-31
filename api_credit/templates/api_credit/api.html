@@ -4,7 +4,7 @@
 {% block content %}
 <br><br>
 <div class='container homepage_main_div'>
-    <div class='row'>
+    <div class='row w-50'>
         <div class='col-md-12 col-sm-12 mb-3'>
             <br><br>
             <div class="container w-100" id="picture_main_div">
@@ -37,7 +37,7 @@
         <div class='col-md-12 col-sm-12 mb-3'>
             <div class="container mt-4">
                 <h4>Choisir un modèle</h4>
-                <form class='w-50' method="POST" action="{% url 'predict' %}" enctype="multipart/form-data">
+                <form method="POST" action="{% url 'predict' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <!-- sélection du modèle -->
                     <div class="form-group mt-3">
