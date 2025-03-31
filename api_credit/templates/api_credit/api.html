@@ -2,6 +2,51 @@
 {% block title %}Prêt à dépenser | Crédit Scoring{% endblock %}
 {% load static %}
 {% block content %}
+<div class="container d-flex flex-column align-items-center justify-content-center vh-100">
+    <div class="w-100 text-center mb-4">
+        <h4 for="customer_dropdown">Choisir un client</h4>
+        <select id="customer_dropdown" name="customer" class="form-control" onchange="showCustomerDetails()">
+            {% for customer in all_customers %}
+                <option value="{{ customer.SK_ID_CURR }}"
+                        data-birth="{{ customer.DAYS_BIRTH }}"
+                        data-gender="{{ customer.CODE_GENDER_M }}"
+                        data-employed="{{ customer.DAYS_EMPLOYED }}"
+                        data-credit="{{ customer.AMT_CREDIT }}"
+                        data-income="{{ customer.AMT_INCOME_TOTAL }}">
+                    Identifiant: {{ customer.SK_ID_CURR }}
+                </option>
+            {% endfor %}
+        </select>
+        <ul id="customer_details" class="text-start mt-3 list-unstyled">
+            <li><strong class="text-warning">Âge :</strong> <span id="detail_birth" class="text-light"></span> (en jours au moment du prêt)</li>
+            <li><strong class="text-warning">Sexe :</strong> <span id="detail_gender" class="text-light"></span></li>
+            <li><strong class="text-warning">Employé depuis :</strong> <span id="detail_employed" class="text-light"></span> jours</li>
+            <li><strong class="text-warning">Montant du crédit :</strong> <span id="detail_credit" class="text-light"></span> €</li>
+            <li><strong class="text-warning">Revenus annuels :</strong> <span id="detail_income" class="text-light"></span> €</li>
+        </ul>
+    </div>
+    <div class="w-100 text-center">
+        <h4>Choisir un modèle</h4>
+        <form method="POST" action="{% url 'predict' %}" class="d-flex flex-column align-items-center" enctype="multipart/form-data">
+            {% csrf_token %}
+            <select name="model" class="form-control w-50 my-3" required>
+                <option value="" disabled selected>-- Sélectionnez un modèle --</option>
+                <option value="LogisticRegression">LogisticRegression</option>
+            </select>
+            <input type="hidden" id="client_id" name="client_id" value="">
+            <button type="submit" class="btn btn-outline-success">Obtenir une prédiction</button>
+        </form>
+    </div>
+</div>
+{% endblock content %}
+
+
+
+
+{% comment %} {% extends 'main.html' %}
+{% block title %}Prêt à dépenser | Crédit Scoring{% endblock %}
+{% load static %}
+{% block content %}
 <br><br>
 <div class='container w-75 homepage_main_div'>
     <div class='row'>
@@ -57,4 +102,4 @@
         </div>
     </div>
 </div>
-{% endblock content %}
+{% endblock content %} {% endcomment %}
