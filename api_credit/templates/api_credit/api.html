@@ -35,13 +35,13 @@
             </div>
         </div>
         <div class='col-md-12 col-sm-12 mb-3'>
-            <div class="container w-50 mt-4">
+            <div class="container mt-4">
                 <h4>Choisir un modèle</h4>
-                <form method="POST" action="{% url 'predict' %}" enctype="multipart/form-data">
+                <form class='w-50' method="POST" action="{% url 'predict' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <!-- sélection du modèle -->
                     <div class="form-group mt-3">
-                        <select name="model" class="form-control w-100 mx-auto" required>
+                        <select name="model" class="form-control mx-auto" required>
                             <option value="" disabled selected>-- Sélectionnez un modèle --</option>
                             <option value="LogisticRegression">LogisticRegression</option>
                         </select>
