@@ -209,7 +209,7 @@ def predict(request):
                     return JsonResponse({"error": "Données JSON invalides."}, status=400)
 
                 input_data = pd.DataFrame([request_data])  # convertir en DataFrame
-                if input_data.shape[1] != 26:  # vérifier si le nombre de colonnes est correct
+                if input_data.shape[1] != 29:  # vérifier si le nombre de colonnes est correct
                     return JsonResponse({"error": "Le nombre de variables est incorrect."}, status=400)
 
             else:
