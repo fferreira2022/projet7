@@ -291,11 +291,6 @@ def predict(request):
 
             status = "Accepté" if predictions == 0 else "Refusé"
             status_class = "text-success" if predictions == 0 else "text-danger"
-            
-            shap_summary_plot_path = os.path.join(
-                    os.path.dirname(os.path.abspath(__file__)),
-                    "../mlartifacts/406813215569809067/f805d569705e46e4984d8f5a44d80118/artifacts/shap_summary_plot.png"
-                )
 
             # stocker les résultats dans le dictionnaire context
             context = {
@@ -306,7 +301,7 @@ def predict(request):
                 "status": status,
                 "status_class": status_class,
                 "threshold": threshold,
-                "shap_summary_plot": "https://projet7-production.up.railway.app/staticfiles/images/shap_summary_plot.png",
+                "shap_summary_plot_path": "https://projet7-production.up.railway.app/staticfiles/images/shap_summary_plot.png",
             }
             
             #------------------ fin du processus commun -----------------
