@@ -139,7 +139,7 @@ def get_model():
     Fonction pour charger un modèle scikit-learn depuis un fichier local avec un chemin prédéfini.
     """
     base_path = os.path.dirname(os.path.abspath(__file__))
-    filepath = os.path.join(base_path, "../mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/artifacts/mlflow_model/model.pkl")
+    filepath = os.path.join(base_path, "../mlartifacts/406813215569809067/94042930d02b4d0d867a8735a5598ea8/artifacts/mlflow_model/model.pkl")
 
     try:
         # Charger le modèle à partir du fichier spécifié
@@ -157,7 +157,7 @@ def get_threshold():
     """
     filepath = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
-        "../mlruns/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/metrics/best_threshold"
+        "../mlruns/406813215569809067/94042930d02b4d0d867a8735a5598ea8/metrics/best_threshold"
     )
     try:
         # Lire le contenu du fichier
@@ -312,7 +312,7 @@ def predict(request):
                 # charger le lime explainer sauvegardé en local
                 lime_explainer_path = os.path.join(
                     os.path.dirname(os.path.abspath(__file__)),
-                    "../mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/artifacts/explainers/lime_explainer_params.joblib"
+                    "../mlartifacts/406813215569809067/94042930d02b4d0d867a8735a5598ea8/artifacts/explainers/lime_explainer_params.joblib"
                 )
                 try:
                     params = joblib.load(lime_explainer_path)

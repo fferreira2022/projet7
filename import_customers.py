@@ -8,13 +8,13 @@ import csv
 from api_credit.models import Customer  # Remplacez "myapp" par le nom de votre application
 
 # Chemin vers le fichier CSV
-csv_file_path = "static/csv/clients_test.csv"
+csv_file_path = "clients_test_new.csv"
 
 # Lire et insérer uniquement les 15 premières lignes
 with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
     for i, row in enumerate(reader):
-        if i >= 15:  # Arrêter après 15 lignes
+        if i >= 100:  # Arrêter après 15 lignes
             break
         Customer.objects.create(
             SK_ID_CURR=int(row['SK_ID_CURR']),
@@ -42,5 +42,8 @@ with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
             NAME_EDUCATION_TYPE_Higher_education=row['NAME_EDUCATION_TYPE_Higher_education'].strip() in ['1', 'True', 'true'],
             NAME_EDUCATION_TYPE_Incomplete_higher=row['NAME_EDUCATION_TYPE_Incomplete_higher'].strip() in ['1', 'True', 'true'],
             NAME_EDUCATION_TYPE_Lower_secondary=row['NAME_EDUCATION_TYPE_Lower_secondary'].strip() in ['1', 'True', 'true'],
-            NAME_EDUCATION_TYPE_Secondary_secondary_special=row['NAME_EDUCATION_TYPE_Secondary_secondary_special'].strip() in ['1', 'True', 'true'],
+            LOAN_TYPE_Cash_0_or_Revolving_1 = int(row['LOAN_TYPE_Cash_0_or_Revolving_1']),
+            CNT_CHILDREN = int(row['CNT_CHILDREN']),
+            OWN_CAR_AGE = float(row['OWN_CAR_AGE']) if row['OWN_CAR_AGE'].strip() else 0.0,
+            REG_REGION_NOT_WORK_REGION = int(row['REG_REGION_NOT_WORK_REGION']),
         )
