@@ -301,7 +301,7 @@ def predict(request):
                 "status": status,
                 "status_class": status_class,
                 "threshold": threshold,
-                "shap_summary_plot_path": "https://projet7-production.up.railway.app/staticfiles/images/shap_summary_plot.png",
+                "shap_summary_plot_url": "https://projet7-production.up.railway.app/staticfiles/images/shap_summary_plot.png",
             }
             
             #------------------ fin du processus commun -----------------
