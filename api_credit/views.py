@@ -139,7 +139,7 @@ def get_model():
     Fonction pour charger un modèle scikit-learn depuis un fichier local avec un chemin prédéfini.
     """
     base_path = os.path.dirname(os.path.abspath(__file__))
-    filepath = os.path.join(base_path, "../mlartifacts/406813215569809067/94042930d02b4d0d867a8735a5598ea8/artifacts/mlflow_model/model.pkl")
+    filepath = os.path.join(base_path, "../mlartifacts/406813215569809067/f805d569705e46e4984d8f5a44d80118/artifacts/mlflow_model/model.pkl")
 
     try:
         # Charger le modèle à partir du fichier spécifié
@@ -157,7 +157,7 @@ def get_threshold():
     """
     filepath = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
-        "../mlruns/406813215569809067/94042930d02b4d0d867a8735a5598ea8/metrics/best_threshold"
+        "../mlruns/406813215569809067/f805d569705e46e4984d8f5a44d80118/metrics/best_threshold"
     )
     try:
         # Lire le contenu du fichier
@@ -291,6 +291,11 @@ def predict(request):
 
             status = "Accepté" if predictions == 0 else "Refusé"
             status_class = "text-success" if predictions == 0 else "text-danger"
+            
+            shap_summary_plot_path = os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    "../mlartifacts/406813215569809067/f805d569705e46e4984d8f5a44d80118/artifacts/shap_summary_plot.png"
+                )
 
             # stocker les résultats dans le dictionnaire context
             context = {
@@ -300,7 +305,8 @@ def predict(request):
                 "predictions": predictions.tolist(),
                 "status": status,
                 "status_class": status_class,
-                "threshold": threshold 
+                "threshold": threshold,
+                "shap_summary_plot": "https://projet7-production.up.railway.app/staticfiles/images/shap_summary_plot.png",
             }
             
             #------------------ fin du processus commun -----------------
@@ -312,7 +318,7 @@ def predict(request):
                 # charger le lime explainer sauvegardé en local
                 lime_explainer_path = os.path.join(
                     os.path.dirname(os.path.abspath(__file__)),
-                    "../mlartifacts/406813215569809067/94042930d02b4d0d867a8735a5598ea8/artifacts/explainers/lime_explainer_params.joblib"
+                    "../mlartifacts/406813215569809067/f805d569705e46e4984d8f5a44d80118/artifacts/explainers/lime_explainer_params.joblib"
                 )
                 try:
                     params = joblib.load(lime_explainer_path)
