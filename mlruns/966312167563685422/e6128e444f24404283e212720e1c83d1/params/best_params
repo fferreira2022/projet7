@@ -1,1 +1,0 @@
-{'classifier__colsample_bytree': 0.8, 'classifier__learning_rate': 0.3, 'classifier__max_depth': 20, 'classifier__min_child_samples': 30, 'classifier__n_estimators': 100, 'classifier__subsample': 0.8}
