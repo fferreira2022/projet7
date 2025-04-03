@@ -31,7 +31,7 @@ load_dotenv()
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG')
+DEBUG = False
 
 ALLOWED_HOSTS = ['projet7-production.up.railway.app', 'https://projet7-production.up.railway.app']
 CSRF_TRUSTED_ORIGINS = ['https://projet7-production.up.railway.app']
