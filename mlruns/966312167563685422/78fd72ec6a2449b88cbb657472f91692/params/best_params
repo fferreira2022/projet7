@@ -1,1 +1,0 @@
-{'classifier__C': 0.01, 'classifier__max_iter': 120, 'classifier__penalty': 'l2', 'classifier__solver': 'saga'}

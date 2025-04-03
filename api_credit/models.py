@@ -54,8 +54,9 @@ class Customer(models.Model):
     NAME_EDUCATION_TYPE_Higher_education = models.BooleanField(default=False)
     NAME_EDUCATION_TYPE_Incomplete_higher = models.BooleanField(default=False)
     NAME_EDUCATION_TYPE_Lower_secondary = models.BooleanField(default=False)
-    NAME_EDUCATION_TYPE_Secondary_secondary_special = models.BooleanField(default=False)
-
+    LOAN_TYPE_Cash_0_or_Revolving_1 = models.IntegerField(default=0)
+    CNT_CHILDREN = models.IntegerField(default=0)
+    REG_REGION_NOT_WORK_REGION = models.IntegerField(default=0)
+    OWN_CAR_AGE = models.FloatField(default=0)
     def __str__(self):
         return f"Customer {self.SK_ID_CURR}"
-
