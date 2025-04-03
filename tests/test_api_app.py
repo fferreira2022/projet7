@@ -177,22 +177,22 @@ def test_model_loading_remote(mock_get_model):
 
     # définir les données pour un client
     data={
-        "SK_ID_CURR": 100091,
-        "EXT_SOURCE_1": 0.56,
-        "EXT_SOURCE_2": 0.78,
-        "EXT_SOURCE_3": 0.65,
-        "DAYS_BIRTH": 12000,
-        "DAYS_EMPLOYED": 4000,
-        "CODE_GENDER_M": True,
-        "CREDIT_INCOME_PERCENT": 0.25,
-        "ANNUITY_INCOME_PERCENT": 0.12,
-        "CREDIT_TERM": 36.5,
-        "AMT_CREDIT": 250000.0,
-        "AMT_ANNUITY": 15000.0,
-        "AMT_INCOME_TOTAL": 100000.0,
-        "DAYS_EMPLOYED_PERCENT": 0.33,
+        "SK_ID_CURR": 100001,
+        "EXT_SOURCE_1": 0.7526144906031748,
+        "EXT_SOURCE_2": 0.7896543511176771,
+        "EXT_SOURCE_3": 0.1595195404777181,
+        "DAYS_BIRTH": 19241,
+        "DAYS_EMPLOYED": 2329.0,
+        "CODE_GENDER_M": False,
+        "CREDIT_INCOME_PERCENT": 4.213333333333333,
+        "ANNUITY_INCOME_PERCENT": 0.1523,
+        "CREDIT_TERM": 0.0361471518987341,
+        "AMT_CREDIT": 568800.0,
+        "AMT_ANNUITY": 20560.5,
+        "AMT_INCOME_TOTAL": 135000.0,
+        "DAYS_EMPLOYED_PERCENT": 0.1210436048022452,
         "NAME_INCOME_TYPE_Businessman": False,
-        "NAME_INCOME_TYPE_Commercial_associate": True,
+        "NAME_INCOME_TYPE_Commercial_associate": False,
         "NAME_INCOME_TYPE_Pensioner": False,
         "NAME_INCOME_TYPE_State_servant": False,
         "NAME_INCOME_TYPE_Student": False,
@@ -202,7 +202,11 @@ def test_model_loading_remote(mock_get_model):
         "NAME_EDUCATION_TYPE_Higher_education": True,
         "NAME_EDUCATION_TYPE_Incomplete_higher": False,
         "NAME_EDUCATION_TYPE_Lower_secondary": False,
-        "NAME_EDUCATION_TYPE_Secondary_secondary_special": False
+        "LOAN_TYPE_Cash_0_or_Revolving_1" : 0,
+        "CNT_CHILDREN": 1,
+        "REG_REGION_NOT_WORK_REGION": 1,
+        "OWN_CAR_AGE": 2.0
+    
         }
     
     # effectuer une requête POST
