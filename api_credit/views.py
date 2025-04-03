@@ -139,7 +139,7 @@ def get_model():
     Fonction pour charger un modèle scikit-learn depuis un fichier local avec un chemin prédéfini.
     """
     base_path = os.path.dirname(os.path.abspath(__file__))
-    filepath = os.path.join(base_path, "../mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/artifacts/mlflow_model/model.pkl")
+    filepath = os.path.join(base_path, "../mlartifacts/406813215569809067/f805d569705e46e4984d8f5a44d80118/artifacts/mlflow_model/model.pkl")
 
     try:
         # Charger le modèle à partir du fichier spécifié
@@ -157,7 +157,7 @@ def get_threshold():
     """
     filepath = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
-        "../mlruns/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/metrics/best_threshold"
+        "../mlruns/406813215569809067/f805d569705e46e4984d8f5a44d80118/metrics/best_threshold"
     )
     try:
         # Lire le contenu du fichier
@@ -256,7 +256,7 @@ def predict(request):
 
             # # récupérer le seuil logué dans MLflow
             # client = MlflowClient()
-            # run_id = "6a092d75528f46c0bf4fbf1cb5f93daf"  
+            # run_id = "f805d569705e46e4984d8f5a44d80118"  
             # metrics = client.get_run(run_id).data.metrics
             # threshold = metrics.get("best_threshold", None)  # Récupération du seuil (par défaut None s'il est absent)
             
@@ -307,12 +307,12 @@ def predict(request):
 
             if not is_remote:
                 # Charger l'explainer LIME depuis MLflow
-                # lime_artifact_path = mlflow.artifacts.download_artifacts("mlflow-artifacts:/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/artifacts/explainers/lime_explainer_params.joblib")
+                # lime_artifact_path = mlflow.artifacts.download_artifacts("mlflow-artifacts:/406813215569809067/f805d569705e46e4984d8f5a44d80118/artifacts/explainers/lime_explainer_params.joblib")
                 
                 # charger le lime explainer sauvegardé en local
                 lime_explainer_path = os.path.join(
                     os.path.dirname(os.path.abspath(__file__)),
-                    "../mlartifacts/166092811025692203/6a092d75528f46c0bf4fbf1cb5f93daf/artifacts/explainers/lime_explainer_params.joblib"
+                    "../mlartifacts/406813215569809067/f805d569705e46e4984d8f5a44d80118/artifacts/explainers/lime_explainer_params.joblib"
                 )
                 try:
                     params = joblib.load(lime_explainer_path)
