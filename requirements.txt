@@ -155,7 +155,7 @@ tenacity==9.0.0
 threadpoolctl==3.5.0
 tifffile==2025.2.18
 toml==0.10.2
-tornado==6.4.2
+tornado==6.5.1
 tqdm==4.67.1
 traitlets==5.14.3
 typer==0.15.2
