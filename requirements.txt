@@ -27,7 +27,7 @@ Deprecated==1.2.18
 deprecation==2.1.0
 distlib==0.3.9
 distro==1.9.0
-Django==5.2
+Django==5.2.9
 django-auto-logout==0.5.1
 docker==7.1.0
 dynaconf==3.2.10
