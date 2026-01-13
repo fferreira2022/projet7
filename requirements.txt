@@ -166,7 +166,7 @@ ujson==5.10.0
 urllib3==2.3.0
 uuid6==2024.7.10
 uvicorn==0.34.0
-virtualenv==20.29.3
+virtualenv==20.36.1
 waitress==3.0.2
 watchdog==6.0.0
 watchfiles==1.0.4
